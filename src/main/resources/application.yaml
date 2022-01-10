@@ -1,0 +1,48 @@
+auth:
+  token:
+  account: 2091021267
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    username: postgres
+    password: 12345
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/piapi
+  liquibase:
+    enabled: true
+    change-log: classpath:changelog.xml
+
+config:
+  candles:
+    db-write-enabled: true
+    stream-count: 5
+  orderbook:
+    db-write-enabled: true
+    stream-count: 5
+  trades:
+    db-write-enabled: true
+    stream-count: 5
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+      base-path: /system
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+
+grpc:
+  url: invest-public-api.tinkoff.ru
+  port: 443
