@@ -23,7 +23,7 @@ public class InstrumentService {
     private final GrpcPublicInstrumentService publicInstrumentService;
     private final GrpcPublicMarketdataService publicMarketdataService;
     private final InstrumentRepository instrumentRepository;
-
+    private final StreamService streamService;
 
     @EventListener(ApplicationReadyEvent.class)
     public void initInstruments() {
@@ -34,6 +34,7 @@ public class InstrumentService {
             getFutures(instrumentStatus);
             getShares(instrumentStatus);
         }
+        streamService.collectFigi();
     }
 
 

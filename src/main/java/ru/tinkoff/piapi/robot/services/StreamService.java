@@ -10,7 +10,11 @@ import ru.tinkoff.piapi.robot.grpc.StreamConfiguration;
 import ru.tinkoff.piapi.robot.grpc.marketdata.GrpcStreamMarketDataService;
 import ru.tinkoff.piapi.robot.services.events.TradingStatusChangedEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -32,10 +36,9 @@ public class StreamService {
         this.streamMarketDataService = streamMarketDataService;
         threadPoolSize = streamConfiguration.getCandles().getStreamCount() + streamConfiguration.getOrderbook().getStreamCount() + streamConfiguration.getTrades().getStreamCount() + 1;
         infoStreamExecutorService = Executors.newFixedThreadPool(2);
-        collectFigi();
     }
 
-    private void collectFigi() {
+    public void collectFigi() {
         normalTradingFigi = new HashSet<>(instrumentRepository.figiByTradingStatus(SecurityTradingStatus.SECURITY_TRADING_STATUS_NORMAL_TRADING.name()));
         allFigi = new HashSet<>(instrumentRepository.findAll());
         log.info("normal_trading figi size {}", normalTradingFigi.size());
@@ -47,7 +50,6 @@ public class StreamService {
     }
 
     public void initMDStreams() {
-        collectFigi();
         refreshExecutorService();
         orderbookStream();
         candlesStream();
@@ -57,7 +59,9 @@ public class StreamService {
 
     @Scheduled(fixedRate = 1000 * 60)
     public void updateStreams() {
-        if (newFigi.size() == 0) return;
+        if (newFigi.size() == 0) {
+            return;
+        }
         var needToRefreshStream = false;
         for (TradingStatusChangedEvent tradingStatusChangedEvent : newFigi) {
             var figi = tradingStatusChangedEvent.getFigi();

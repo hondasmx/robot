@@ -30,4 +30,9 @@ public class OrderbookProcessor implements MarketdataStreamProcessor {
             orderbookRepository.addOrderbook(figi, time);
         }
     }
+
+    @Override
+    public String streamName() {
+        return "orderbook";
+    }
 }

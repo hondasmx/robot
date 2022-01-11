@@ -32,4 +32,9 @@ public class TradesProcessor implements MarketdataStreamProcessor {
             repository.addTrade(figi, time);
         }
     }
+
+    @Override
+    public String streamName() {
+        return "trades";
+    }
 }

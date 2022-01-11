@@ -154,13 +154,13 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
 
         @Override
         public void onError(Throwable t) {
-            log.error("onError was invoked. error: {}", t.toString());
+            log.error("onError was invoked. stream: {}, error: {}", streamProcessor.streamName(), t.toString());
             throw new RuntimeException("on error was thrown");
         }
 
         @Override
         public void onCompleted() {
-            log.info("onCompleted was invoked");
+            log.info("onCompleted was invoked. stream: {}", streamProcessor.streamName());
         }
     }
 }

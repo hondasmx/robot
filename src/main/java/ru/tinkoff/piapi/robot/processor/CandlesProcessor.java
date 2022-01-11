@@ -32,4 +32,9 @@ public class CandlesProcessor implements MarketdataStreamProcessor {
             candlesRepository.addCandle(figi, time);
         }
     }
+
+    @Override
+    public String streamName() {
+        return "candles";
+    }
 }

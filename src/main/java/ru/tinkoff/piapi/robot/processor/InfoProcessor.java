@@ -29,4 +29,9 @@ public class InfoProcessor implements MarketdataStreamProcessor {
         instrumentRepository.updateInstrument(figi, tradingStatus);
         publisher.publishEvent(new TradingStatusChangedEvent(figi, tradingStatus));
     }
+
+    @Override
+    public String streamName() {
+        return "info";
+    }
 }
