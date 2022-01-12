@@ -8,6 +8,8 @@ import ru.tinkoff.piapi.contract.v1.SubscriptionStatus;
 import ru.tinkoff.piapi.robot.grpc.StreamConfiguration;
 import ru.tinkoff.piapi.robot.db.repositories.CandlesRepository;
 
+import static ru.tinkoff.piapi.robot.processor.MarketdataStreamNames.CANDLES;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -35,6 +37,6 @@ public class CandlesProcessor implements MarketdataStreamProcessor {
 
     @Override
     public String streamName() {
-        return "candles";
+        return CANDLES;
     }
 }

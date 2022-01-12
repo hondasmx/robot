@@ -35,6 +35,10 @@ public class InstrumentService {
             getShares(instrumentStatus);
         }
         streamService.collectFigi();
+        streamService.initInfoStream();
+        streamService.initCandlesStream();
+        streamService.initOrderbookStream();
+        streamService.initTradesStream();
     }
 
 

@@ -9,6 +9,8 @@ import ru.tinkoff.piapi.contract.v1.SubscriptionStatus;
 import ru.tinkoff.piapi.robot.db.repositories.InstrumentRepository;
 import ru.tinkoff.piapi.robot.services.events.TradingStatusChangedEvent;
 
+import static ru.tinkoff.piapi.robot.processor.MarketdataStreamNames.INFO;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -32,6 +34,6 @@ public class InfoProcessor implements MarketdataStreamProcessor {
 
     @Override
     public String streamName() {
-        return "info";
+        return INFO;
     }
 }

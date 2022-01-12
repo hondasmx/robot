@@ -8,6 +8,8 @@ import ru.tinkoff.piapi.contract.v1.SubscriptionStatus;
 import ru.tinkoff.piapi.robot.grpc.StreamConfiguration;
 import ru.tinkoff.piapi.robot.db.repositories.OrderbookRepository;
 
+import static ru.tinkoff.piapi.robot.processor.MarketdataStreamNames.ORDERBOOK;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -33,6 +35,6 @@ public class OrderbookProcessor implements MarketdataStreamProcessor {
 
     @Override
     public String streamName() {
-        return "orderbook";
+        return ORDERBOOK;
     }
 }

@@ -8,6 +8,8 @@ import ru.tinkoff.piapi.contract.v1.SecurityTradingStatus;
 import ru.tinkoff.piapi.robot.db.repositories.InstrumentRepository;
 import ru.tinkoff.piapi.robot.grpc.StreamConfiguration;
 import ru.tinkoff.piapi.robot.grpc.marketdata.GrpcStreamMarketDataService;
+import ru.tinkoff.piapi.robot.processor.MarketdataStreamNames;
+import ru.tinkoff.piapi.robot.services.events.StreamErrorEvent;
 import ru.tinkoff.piapi.robot.services.events.TradingStatusChangedEvent;
 
 import java.util.ArrayList;
@@ -24,18 +26,21 @@ public class StreamService {
 
     private final InstrumentRepository instrumentRepository;
     private final GrpcStreamMarketDataService streamMarketDataService;
-    private final int threadPoolSize;
     private final List<TradingStatusChangedEvent> newFigi = Collections.synchronizedList(new ArrayList<>());
-    private final ExecutorService infoStreamExecutorService;
-    private ExecutorService executorService;
+    private ExecutorService infoStreamExecutorService;
+    private ExecutorService tradesExecutorService;
+    private ExecutorService orderbookExecutorService;
+    private ExecutorService candlesExecutorService;
     private Set<String> normalTradingFigi = Collections.synchronizedSet(new HashSet<>());
     private Set<String> allFigi = Collections.synchronizedSet(new HashSet<>());
 
     public StreamService(InstrumentRepository instrumentRepository, GrpcStreamMarketDataService streamMarketDataService, StreamConfiguration streamConfiguration) {
         this.instrumentRepository = instrumentRepository;
         this.streamMarketDataService = streamMarketDataService;
-        threadPoolSize = streamConfiguration.getCandles().getStreamCount() + streamConfiguration.getOrderbook().getStreamCount() + streamConfiguration.getTrades().getStreamCount() + 1;
         infoStreamExecutorService = Executors.newFixedThreadPool(2);
+        tradesExecutorService = Executors.newFixedThreadPool(2);
+        orderbookExecutorService = Executors.newFixedThreadPool(2);
+        candlesExecutorService = Executors.newFixedThreadPool(2);
     }
 
     public void collectFigi() {
@@ -45,15 +50,49 @@ public class StreamService {
         log.info("all figi size {}", allFigi.size());
     }
 
+    @EventListener(StreamErrorEvent.class)
+    public void recreateStream(StreamErrorEvent event) {
+        var streamName = event.getStreamName();
+        log.info("recreating stream: {}", streamName);
+        if (MarketdataStreamNames.ORDERBOOK.equals(streamName)) {
+            initOrderbookStream();
+        } else if (MarketdataStreamNames.CANDLES.equals(streamName)) {
+            initCandlesStream();
+        } else if (MarketdataStreamNames.INFO.equals(streamName)) {
+            initInfoStream();
+        } else if (MarketdataStreamNames.TRADES.equals(streamName)) {
+            initTradesStream();
+        }
+    }
+
     public void initInfoStream() {
+        infoStreamExecutorService.shutdownNow();
+        infoStreamExecutorService = Executors.newFixedThreadPool(2);
         infoStreamExecutorService.execute(() -> streamMarketDataService.infoStream(allFigi));
     }
 
+    public void initCandlesStream() {
+        candlesExecutorService.shutdownNow();
+        candlesExecutorService = Executors.newFixedThreadPool(2);
+        candlesExecutorService.execute(() -> streamMarketDataService.candlesStream(normalTradingFigi));
+    }
+
+    public void initOrderbookStream() {
+        orderbookExecutorService.shutdownNow();
+        orderbookExecutorService = Executors.newFixedThreadPool(2);
+        orderbookExecutorService.execute(() -> streamMarketDataService.orderBookStream(normalTradingFigi));
+    }
+
+    public void initTradesStream() {
+        tradesExecutorService.shutdownNow();
+        tradesExecutorService = Executors.newFixedThreadPool(2);
+        tradesExecutorService.execute(() -> streamMarketDataService.tradesStream(normalTradingFigi));
+    }
+
     public void initMDStreams() {
-        refreshExecutorService();
-        orderbookStream();
-        candlesStream();
-        tradesStream();
+        initOrderbookStream();
+        initCandlesStream();
+        initTradesStream();
     }
 
 
@@ -92,26 +131,5 @@ public class StreamService {
     @EventListener(TradingStatusChangedEvent.class)
     public void tradingStatusChanged(TradingStatusChangedEvent event) {
         newFigi.add(event);
-    }
-
-    private void candlesStream() {
-        executorService.execute(() -> streamMarketDataService.candlesStream(normalTradingFigi));
-    }
-
-    private void orderbookStream() {
-        executorService.execute(() -> streamMarketDataService.orderBookStream(normalTradingFigi));
-    }
-
-    private void tradesStream() {
-        executorService.execute(() -> streamMarketDataService.tradesStream(normalTradingFigi));
-    }
-
-    private void refreshExecutorService() {
-        log.info("recreating executor service. threadPoolSize {}", threadPoolSize);
-        if (executorService == null) {
-            executorService = Executors.newFixedThreadPool(threadPoolSize);
-        }
-        executorService.shutdown();
-        executorService = Executors.newFixedThreadPool(threadPoolSize);
     }
 }

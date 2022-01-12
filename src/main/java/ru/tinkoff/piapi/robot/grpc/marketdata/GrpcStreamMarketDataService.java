@@ -8,10 +8,12 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import ru.tinkoff.piapi.contract.v1.*;
 import ru.tinkoff.piapi.robot.grpc.BaseService;
 import ru.tinkoff.piapi.robot.processor.*;
+import ru.tinkoff.piapi.robot.services.events.StreamErrorEvent;
 
 import java.util.Set;
 
@@ -24,17 +26,20 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
     private final OrderbookProcessor orderbookProcessor;
     private final TradesProcessor tradesProcessor;
     private final ManagedChannel managedChannel;
+    private final ApplicationEventPublisher publisher;
 
     public GrpcStreamMarketDataService(CandlesProcessor candlesProcessor,
                                        InfoProcessor infoProcessor,
                                        OrderbookProcessor orderbookProcessor,
                                        TradesProcessor tradesProcessor,
-                                       @Qualifier("marketdata_stream") ManagedChannel managedChannel) {
+                                       @Qualifier("marketdata_stream") ManagedChannel managedChannel,
+                                       ApplicationEventPublisher publisher) {
         this.candlesProcessor = candlesProcessor;
         this.infoProcessor = infoProcessor;
         this.orderbookProcessor = orderbookProcessor;
         this.tradesProcessor = tradesProcessor;
         this.managedChannel = managedChannel;
+        this.publisher = publisher;
     }
 
     @Override
@@ -61,7 +66,7 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
                 .newBuilder()
                 .setSubscribeCandlesRequest(candlesBuilder)
                 .build();
-        var observer = getStubWithHeaders().marketDataStream(new MarketDataStreamObserver(candlesProcessor, request));
+        var observer = getStubWithHeaders().marketDataStream(new MarketDataStreamObserver(candlesProcessor));
         observer.onNext(request);
     }
 
@@ -81,7 +86,7 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
                 .newBuilder()
                 .setSubscribeTradesRequest(orderBookBuilder)
                 .build();
-        var observer = getStubWithHeaders().marketDataStream(new MarketDataStreamObserver(tradesProcessor, request));
+        var observer = getStubWithHeaders().marketDataStream(new MarketDataStreamObserver(tradesProcessor));
         observer.onNext(request);
     }
 
@@ -102,7 +107,7 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
                 .newBuilder()
                 .setSubscribeOrderBookRequest(orderBookBuilder)
                 .build();
-        var observer = getStubWithHeaders().marketDataStream(new MarketDataStreamObserver(orderbookProcessor, request));
+        var observer = getStubWithHeaders().marketDataStream(new MarketDataStreamObserver(orderbookProcessor));
         observer.onNext(request);
     }
 
@@ -119,7 +124,7 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
                 .newBuilder()
                 .setSubscribeInfoRequest(candlesBuilder)
                 .build();
-        var observer = getStubWithHeaders().marketDataStream(new MarketDataStreamObserver(infoProcessor, request));
+        var observer = getStubWithHeaders().marketDataStream(new MarketDataStreamObserver(infoProcessor));
         observer.onNext(request);
     }
 
@@ -138,13 +143,13 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
     }
 
     @Getter
-    public static class MarketDataStreamObserver implements StreamObserver<MarketDataResponse> {
+    public class MarketDataStreamObserver implements StreamObserver<MarketDataResponse> {
         private final MarketdataStreamProcessor streamProcessor;
-        private final MarketDataRequest request;
 
-        public MarketDataStreamObserver(MarketdataStreamProcessor streamProcessor, MarketDataRequest request) {
+
+        public MarketDataStreamObserver(MarketdataStreamProcessor streamProcessor) {
             this.streamProcessor = streamProcessor;
-            this.request = request;
+
         }
 
         @Override
@@ -155,7 +160,7 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
         @Override
         public void onError(Throwable t) {
             log.error("onError was invoked. stream: {}, error: {}", streamProcessor.streamName(), t.toString());
-            throw new RuntimeException("on error was thrown");
+            publisher.publishEvent(new StreamErrorEvent(streamProcessor.streamName()));
         }
 
         @Override
