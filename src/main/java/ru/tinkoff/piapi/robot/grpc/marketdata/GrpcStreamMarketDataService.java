@@ -6,19 +6,39 @@ import io.grpc.stub.StreamObserver;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import ru.tinkoff.piapi.contract.v1.*;
+import ru.tinkoff.piapi.contract.v1.CandleInstrument;
+import ru.tinkoff.piapi.contract.v1.InfoInstrument;
+import ru.tinkoff.piapi.contract.v1.MarketDataRequest;
+import ru.tinkoff.piapi.contract.v1.MarketDataResponse;
+import ru.tinkoff.piapi.contract.v1.MarketDataStreamServiceGrpc;
+import ru.tinkoff.piapi.contract.v1.OrderBookInstrument;
+import ru.tinkoff.piapi.contract.v1.SubscribeCandlesRequest;
+import ru.tinkoff.piapi.contract.v1.SubscribeInfoRequest;
+import ru.tinkoff.piapi.contract.v1.SubscribeOrderBookRequest;
+import ru.tinkoff.piapi.contract.v1.SubscribeTradesRequest;
+import ru.tinkoff.piapi.contract.v1.SubscriptionAction;
+import ru.tinkoff.piapi.contract.v1.SubscriptionInterval;
+import ru.tinkoff.piapi.contract.v1.TradeInstrument;
 import ru.tinkoff.piapi.robot.grpc.BaseService;
-import ru.tinkoff.piapi.robot.processor.*;
+import ru.tinkoff.piapi.robot.processor.CandlesProcessor;
+import ru.tinkoff.piapi.robot.processor.InfoProcessor;
+import ru.tinkoff.piapi.robot.processor.MarketdataStreamProcessor;
+import ru.tinkoff.piapi.robot.processor.OrderbookProcessor;
+import ru.tinkoff.piapi.robot.processor.TradesProcessor;
 import ru.tinkoff.piapi.robot.services.events.StreamErrorEvent;
 
 import java.util.Set;
 
 @Slf4j
 @Service
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@RequiredArgsConstructor
 public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamServiceGrpc.MarketDataStreamServiceStub> {
 
     private final CandlesProcessor candlesProcessor;
@@ -28,19 +48,6 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
     private final ManagedChannel managedChannel;
     private final ApplicationEventPublisher publisher;
 
-    public GrpcStreamMarketDataService(CandlesProcessor candlesProcessor,
-                                       InfoProcessor infoProcessor,
-                                       OrderbookProcessor orderbookProcessor,
-                                       TradesProcessor tradesProcessor,
-                                       @Qualifier("marketdata_stream") ManagedChannel managedChannel,
-                                       ApplicationEventPublisher publisher) {
-        this.candlesProcessor = candlesProcessor;
-        this.infoProcessor = infoProcessor;
-        this.orderbookProcessor = orderbookProcessor;
-        this.tradesProcessor = tradesProcessor;
-        this.managedChannel = managedChannel;
-        this.publisher = publisher;
-    }
 
     @Override
     protected MarketDataStreamServiceGrpc.MarketDataStreamServiceStub getStub() {

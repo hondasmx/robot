@@ -4,10 +4,16 @@ import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.MetadataUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.tinkoff.piapi.contract.v1.*;
+import ru.tinkoff.piapi.contract.v1.GetOrdersRequest;
+import ru.tinkoff.piapi.contract.v1.OrderDirection;
+import ru.tinkoff.piapi.contract.v1.OrderState;
+import ru.tinkoff.piapi.contract.v1.OrderType;
+import ru.tinkoff.piapi.contract.v1.OrdersServiceGrpc;
+import ru.tinkoff.piapi.contract.v1.PostOrderRequest;
+import ru.tinkoff.piapi.contract.v1.PostOrderResponse;
 import ru.tinkoff.piapi.robot.grpc.BaseService;
 
 import java.util.List;
@@ -15,13 +21,10 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GrpcPublicOrdersService extends BaseService<OrdersServiceGrpc.OrdersServiceBlockingStub> {
 
     private final ManagedChannel managedChannel;
-
-    public GrpcPublicOrdersService(@Qualifier("orders") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
-    }
 
     @Override
     protected OrdersServiceGrpc.OrdersServiceBlockingStub getStub() {

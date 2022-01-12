@@ -24,29 +24,8 @@ public class GrpcConfiguration {
 
     private final Environment env;
 
-    @Bean("instruments")
-    public ManagedChannel managedChannelInstruments() {
-        return getManagedChannel();
-    }
-
-    @Bean("marketdata")
-    public ManagedChannel managedChannelMarketdata() {
-        return getManagedChannel();
-    }
-
-    @Bean("marketdata_stream")
-    public ManagedChannel managedChannelMarketdataStream() {
-        return getManagedChannel();
-    }
-
-    @Bean("orders")
-    public ManagedChannel managedChannelOrders() {
-        return getManagedChannel();
-    }
-
-
-    // для проверки локально через балансировщик
-    private ManagedChannel getManagedChannel() {
+    @Bean
+    public ManagedChannel managedChannel() {
         var address = env.getProperty("grpc.url");
         var port = Integer.parseInt(env.getProperty("grpc.port"));
         return NettyChannelBuilder

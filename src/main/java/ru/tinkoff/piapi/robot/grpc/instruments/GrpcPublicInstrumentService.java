@@ -2,23 +2,29 @@ package ru.tinkoff.piapi.robot.grpc.instruments;
 
 import io.grpc.ManagedChannel;
 import io.grpc.stub.MetadataUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import ru.tinkoff.piapi.contract.v1.*;
+import ru.tinkoff.piapi.contract.v1.Bond;
+import ru.tinkoff.piapi.contract.v1.Currency;
+import ru.tinkoff.piapi.contract.v1.Etf;
+import ru.tinkoff.piapi.contract.v1.Future;
+import ru.tinkoff.piapi.contract.v1.InstrumentStatus;
+import ru.tinkoff.piapi.contract.v1.InstrumentsRequest;
+import ru.tinkoff.piapi.contract.v1.InstrumentsServiceGrpc;
+import ru.tinkoff.piapi.contract.v1.Share;
 import ru.tinkoff.piapi.robot.grpc.BaseService;
 
 import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceGrpc.InstrumentsServiceBlockingStub> {
 
     private final ManagedChannel managedChannel;
-
-    public GrpcPublicInstrumentService(@Qualifier("instruments") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
-    }
 
     @Override
     protected InstrumentsServiceGrpc.InstrumentsServiceBlockingStub getStub() {
