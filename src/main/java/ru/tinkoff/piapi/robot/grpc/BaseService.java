@@ -5,8 +5,7 @@ import io.grpc.Metadata;
 import io.grpc.stub.AbstractStub;
 import io.grpc.stub.MetadataUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -17,16 +16,16 @@ public abstract class BaseService<T extends AbstractStub<T>> {
     protected final AtomicReference<Metadata> trailersCapture = new AtomicReference<>();
     protected final AtomicReference<Metadata> headersCapture = new AtomicReference<>();
 
-    @Autowired
-    protected Environment env;
+    @Value("${auth.token}")
+    private String token;
 
     protected abstract T getStub();
 
     protected T getStubWithHeaders() {
         var stub = getStub();
         var headers = new Metadata();
-        var token = "Bearer " + env.getProperty("auth.token");
-        headers.put(Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER), token);
+        var authToken = "Bearer " + token;
+        headers.put(Metadata.Key.of("Authorization", Metadata.ASCII_STRING_MARSHALLER), authToken);
         return stub.withInterceptors(MetadataUtils.newAttachHeadersInterceptor(headers));
     }
 

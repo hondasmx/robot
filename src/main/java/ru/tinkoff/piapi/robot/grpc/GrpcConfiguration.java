@@ -11,9 +11,11 @@ import io.grpc.netty.shaded.io.netty.handler.ssl.SslContextBuilder;
 import io.grpc.netty.shaded.io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
+import org.springframework.context.annotation.Scope;
 
 import javax.net.ssl.SSLException;
 
@@ -22,14 +24,17 @@ import javax.net.ssl.SSLException;
 @Slf4j
 public class GrpcConfiguration {
 
-    private final Environment env;
+    @Value("${grpc.url}")
+    private String url;
+    @Value("${grpc.port}")
+    private String port;
 
     @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public ManagedChannel managedChannel() {
-        var address = env.getProperty("grpc.url");
-        var port = Integer.parseInt(env.getProperty("grpc.port"));
+        log.info("creating new managed channel");
         return NettyChannelBuilder
-                .forAddress(address, port)
+                .forAddress(url, Integer.parseInt(port))
                 .sslContext(createSslContext())
                 .negotiationType(NegotiationType.TLS)
                 .build();

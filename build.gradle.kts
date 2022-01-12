@@ -2,8 +2,8 @@ import com.google.protobuf.gradle.*
 
 plugins {
     java
-    id ("com.google.protobuf") version "0.8.17"
-    id ("io.freefair.lombok") version "5.3.0"
+    id("com.google.protobuf") version "0.8.17"
+    id("io.freefair.lombok") version "5.3.0"
 }
 
 repositories {
@@ -16,6 +16,9 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:2.6.2")
     implementation("javax.validation:validation-api:2.0.1.Final")
+
+    //rest
+    implementation("com.konghq:unirest-java:3.13.6")
 
     //grpc
     implementation("io.grpc:grpc-all:1.42.1")

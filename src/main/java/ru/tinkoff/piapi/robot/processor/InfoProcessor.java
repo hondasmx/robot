@@ -9,6 +9,8 @@ import ru.tinkoff.piapi.contract.v1.SubscriptionStatus;
 import ru.tinkoff.piapi.robot.db.repositories.InstrumentRepository;
 import ru.tinkoff.piapi.robot.services.events.TradingStatusChangedEvent;
 
+import java.time.Instant;
+
 import static ru.tinkoff.piapi.robot.processor.MarketdataStreamNames.INFO;
 
 @Component
@@ -29,7 +31,7 @@ public class InfoProcessor implements MarketdataStreamProcessor {
         var figi = resp.getFigi();
         var tradingStatus = resp.getTradingStatus().name();
         instrumentRepository.updateInstrument(figi, tradingStatus);
-        publisher.publishEvent(new TradingStatusChangedEvent(figi, tradingStatus));
+        publisher.publishEvent(new TradingStatusChangedEvent(figi, tradingStatus, Instant.now()));
     }
 
     @Override

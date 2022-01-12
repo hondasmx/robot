@@ -2,6 +2,10 @@ auth:
   token:
   account: 2091021267
 
+telegram:
+  token:
+  chat-id:
+
 spring:
   jpa:
     hibernate:

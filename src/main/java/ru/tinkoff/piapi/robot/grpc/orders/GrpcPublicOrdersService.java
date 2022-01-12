@@ -6,6 +6,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.MetadataUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.tinkoff.piapi.contract.v1.GetOrdersRequest;
 import ru.tinkoff.piapi.contract.v1.OrderDirection;
@@ -25,6 +26,8 @@ import java.util.UUID;
 public class GrpcPublicOrdersService extends BaseService<OrdersServiceGrpc.OrdersServiceBlockingStub> {
 
     private final ManagedChannel managedChannel;
+    @Value("${auth.account}")
+    private String accountId;
 
     @Override
     protected OrdersServiceGrpc.OrdersServiceBlockingStub getStub() {
@@ -34,14 +37,12 @@ public class GrpcPublicOrdersService extends BaseService<OrdersServiceGrpc.Order
     }
 
     public List<OrderState> getOrders() {
-        var accountId = env.getProperty("auth.account");
         var request = GetOrdersRequest.newBuilder().setAccountId(accountId).build();
         var body = getStubWithHeaders().getOrders(request);
         return getResponse(body).getResponse().getOrdersList();
     }
 
     public PostOrderResponse postOrder(String figi) {
-        var accountId = env.getProperty("auth.account");
         var orderId = UUID.randomUUID().toString();
         var request = PostOrderRequest.newBuilder()
                 .setAccountId(accountId)
