@@ -39,6 +39,7 @@ public class InstrumentService {
         streamService.initCandlesStream();
         streamService.initOrderbookStream();
         streamService.initTradesStream();
+        streamService.initOrdersStream();
     }
 
 

@@ -1,4 +1,4 @@
-package ru.tinkoff.piapi.robot.processor;
+package ru.tinkoff.piapi.robot.processor.marketdata;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import ru.tinkoff.piapi.contract.v1.SubscriptionStatus;
 import ru.tinkoff.piapi.robot.db.repositories.TradeRepository;
 import ru.tinkoff.piapi.robot.grpc.StreamConfiguration;
 
-import static ru.tinkoff.piapi.robot.processor.MarketdataStreamNames.TRADES;
+import static ru.tinkoff.piapi.robot.processor.StreamNames.TRADES;
 
 @Component
 @Slf4j

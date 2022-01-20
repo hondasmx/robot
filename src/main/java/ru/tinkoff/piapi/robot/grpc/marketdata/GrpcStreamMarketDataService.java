@@ -26,11 +26,11 @@ import ru.tinkoff.piapi.contract.v1.SubscriptionAction;
 import ru.tinkoff.piapi.contract.v1.SubscriptionInterval;
 import ru.tinkoff.piapi.contract.v1.TradeInstrument;
 import ru.tinkoff.piapi.robot.grpc.BaseService;
-import ru.tinkoff.piapi.robot.processor.CandlesProcessor;
-import ru.tinkoff.piapi.robot.processor.InfoProcessor;
-import ru.tinkoff.piapi.robot.processor.MarketdataStreamProcessor;
-import ru.tinkoff.piapi.robot.processor.OrderbookProcessor;
-import ru.tinkoff.piapi.robot.processor.TradesProcessor;
+import ru.tinkoff.piapi.robot.processor.marketdata.CandlesProcessor;
+import ru.tinkoff.piapi.robot.processor.marketdata.InfoProcessor;
+import ru.tinkoff.piapi.robot.processor.marketdata.MarketdataStreamProcessor;
+import ru.tinkoff.piapi.robot.processor.marketdata.OrderbookProcessor;
+import ru.tinkoff.piapi.robot.processor.marketdata.TradesProcessor;
 import ru.tinkoff.piapi.robot.services.events.StreamErrorEvent;
 
 import java.util.Set;

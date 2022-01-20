@@ -8,15 +8,12 @@ import org.springframework.stereotype.Component;
 import ru.tinkoff.piapi.contract.v1.SecurityTradingStatus;
 import ru.tinkoff.piapi.robot.db.repositories.InstrumentRepository;
 import ru.tinkoff.piapi.robot.grpc.marketdata.GrpcStreamMarketDataService;
-import ru.tinkoff.piapi.robot.processor.MarketdataStreamNames;
+import ru.tinkoff.piapi.robot.grpc.orders.GrpcStreamOrdersService;
+import ru.tinkoff.piapi.robot.processor.StreamNames;
 import ru.tinkoff.piapi.robot.services.events.StreamErrorEvent;
 import ru.tinkoff.piapi.robot.services.events.TradingStatusChangedEvent;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,13 +28,14 @@ public class StreamService {
     private final GrpcStreamMarketDataService orderbookGrpcService;
     private final GrpcStreamMarketDataService tradesGrpcService;
     private final GrpcStreamMarketDataService infoGrpcService;
-
-
+    private final GrpcStreamOrdersService ordersGrpcService;
+    private final long DEFAULT_DELAY = 5000;
+    public Set<String> normalTradingFigi = Collections.synchronizedSet(new HashSet<>());
     private ScheduledExecutorService infoStreamExecutorService = Executors.newScheduledThreadPool(2);
     private ScheduledExecutorService tradesExecutorService = Executors.newScheduledThreadPool(2);
     private ScheduledExecutorService orderbookExecutorService = Executors.newScheduledThreadPool(2);
     private ScheduledExecutorService candlesExecutorService = Executors.newScheduledThreadPool(2);
-    public Set<String> normalTradingFigi = Collections.synchronizedSet(new HashSet<>());
+    private ScheduledExecutorService ordersExecutorService = Executors.newScheduledThreadPool(2);
     private Set<String> allFigi = Collections.synchronizedSet(new HashSet<>());
     private List<TradingStatusChangedEvent> newFigi = Collections.synchronizedList(new ArrayList<>());
 
@@ -53,43 +51,52 @@ public class StreamService {
     public void recreateStream(StreamErrorEvent event) {
         var streamName = event.getStreamName();
         log.info("recreating stream: {}", streamName);
-        if (MarketdataStreamNames.ORDERBOOK.equals(streamName)) {
+        if (StreamNames.ORDERBOOK.equals(streamName)) {
             initOrderbookStream();
-        } else if (MarketdataStreamNames.CANDLES.equals(streamName)) {
+        } else if (StreamNames.CANDLES.equals(streamName)) {
             initCandlesStream();
-        } else if (MarketdataStreamNames.INFO.equals(streamName)) {
+        } else if (StreamNames.INFO.equals(streamName)) {
             initInfoStream();
-        } else if (MarketdataStreamNames.TRADES.equals(streamName)) {
+        } else if (StreamNames.TRADES.equals(streamName)) {
             initTradesStream();
+        } else if (StreamNames.ORDERS.equals(streamName)) {
+            initOrdersStream();
         }
     }
 
     public void initInfoStream() {
         infoGrpcService.shutdown();
         infoStreamExecutorService.shutdownNow();
-        infoStreamExecutorService = Executors.newScheduledThreadPool(5);
-        infoStreamExecutorService.schedule(() -> infoGrpcService.infoStream(allFigi), 2000, TimeUnit.MILLISECONDS);
+        infoStreamExecutorService = Executors.newScheduledThreadPool(2);
+        infoStreamExecutorService.schedule(() -> infoGrpcService.infoStream(allFigi), DEFAULT_DELAY, TimeUnit.MILLISECONDS);
     }
 
     public void initCandlesStream() {
         candlesGrpcService.shutdown();
         candlesExecutorService.shutdownNow();
-        candlesExecutorService = Executors.newScheduledThreadPool(5);
-        candlesExecutorService.schedule(() -> candlesGrpcService.candlesStream(normalTradingFigi), 2000, TimeUnit.MILLISECONDS);
+        candlesExecutorService = Executors.newScheduledThreadPool(2);
+        candlesExecutorService.schedule(() -> candlesGrpcService.candlesStream(normalTradingFigi), DEFAULT_DELAY, TimeUnit.MILLISECONDS);
     }
 
     public void initOrderbookStream() {
         orderbookGrpcService.shutdown();
         orderbookExecutorService.shutdownNow();
-        orderbookExecutorService = Executors.newScheduledThreadPool(5);
-        orderbookExecutorService.schedule(() -> orderbookGrpcService.orderBookStream(normalTradingFigi), 2000, TimeUnit.MILLISECONDS);
+        orderbookExecutorService = Executors.newScheduledThreadPool(2);
+        orderbookExecutorService.schedule(() -> orderbookGrpcService.orderBookStream(normalTradingFigi), DEFAULT_DELAY, TimeUnit.MILLISECONDS);
     }
 
     public void initTradesStream() {
         tradesGrpcService.shutdown();
         tradesExecutorService.shutdownNow();
-        tradesExecutorService = Executors.newScheduledThreadPool(5);
-        tradesExecutorService.schedule(() -> tradesGrpcService.tradesStream(normalTradingFigi), 2000, TimeUnit.MILLISECONDS);
+        tradesExecutorService = Executors.newScheduledThreadPool(2);
+        tradesExecutorService.schedule(() -> tradesGrpcService.tradesStream(normalTradingFigi), DEFAULT_DELAY, TimeUnit.MILLISECONDS);
+    }
+
+    public void initOrdersStream() {
+        ordersGrpcService.shutdown();
+        ordersExecutorService.shutdownNow();
+        ordersExecutorService = Executors.newScheduledThreadPool(2);
+        ordersExecutorService.schedule(ordersGrpcService::ordersStream, DEFAULT_DELAY, TimeUnit.MILLISECONDS);
     }
 
     public void initMDStreams() {

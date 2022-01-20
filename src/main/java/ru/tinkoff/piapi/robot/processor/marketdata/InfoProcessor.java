@@ -1,4 +1,4 @@
-package ru.tinkoff.piapi.robot.processor;
+package ru.tinkoff.piapi.robot.processor.marketdata;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +11,7 @@ import ru.tinkoff.piapi.robot.services.events.TradingStatusChangedEvent;
 
 import java.time.Instant;
 
-import static ru.tinkoff.piapi.robot.processor.MarketdataStreamNames.INFO;
+import static ru.tinkoff.piapi.robot.processor.StreamNames.INFO;
 
 @Component
 @RequiredArgsConstructor
