@@ -16,6 +16,7 @@
                 api_trade_flag text,
                 instrument_status text,
                 otc_flag text,
+                exchange text,
                 PRIMARY KEY (id)
             );
 

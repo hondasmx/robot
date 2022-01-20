@@ -17,8 +17,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -32,11 +33,11 @@ public class StreamService {
     private final GrpcStreamMarketDataService infoGrpcService;
 
 
-    private ExecutorService infoStreamExecutorService = Executors.newFixedThreadPool(2);
-    private ExecutorService tradesExecutorService = Executors.newFixedThreadPool(2);
-    private ExecutorService orderbookExecutorService = Executors.newFixedThreadPool(2);
-    private ExecutorService candlesExecutorService = Executors.newFixedThreadPool(2);
-    private Set<String> normalTradingFigi = Collections.synchronizedSet(new HashSet<>());
+    private ScheduledExecutorService infoStreamExecutorService = Executors.newScheduledThreadPool(2);
+    private ScheduledExecutorService tradesExecutorService = Executors.newScheduledThreadPool(2);
+    private ScheduledExecutorService orderbookExecutorService = Executors.newScheduledThreadPool(2);
+    private ScheduledExecutorService candlesExecutorService = Executors.newScheduledThreadPool(2);
+    public Set<String> normalTradingFigi = Collections.synchronizedSet(new HashSet<>());
     private Set<String> allFigi = Collections.synchronizedSet(new HashSet<>());
     private List<TradingStatusChangedEvent> newFigi = Collections.synchronizedList(new ArrayList<>());
 
@@ -64,27 +65,31 @@ public class StreamService {
     }
 
     public void initInfoStream() {
+        infoGrpcService.shutdown();
         infoStreamExecutorService.shutdownNow();
-        infoStreamExecutorService = Executors.newFixedThreadPool(2);
-        infoStreamExecutorService.execute(() -> infoGrpcService.infoStream(allFigi));
+        infoStreamExecutorService = Executors.newScheduledThreadPool(5);
+        infoStreamExecutorService.schedule(() -> infoGrpcService.infoStream(allFigi), 2000, TimeUnit.MILLISECONDS);
     }
 
     public void initCandlesStream() {
+        candlesGrpcService.shutdown();
         candlesExecutorService.shutdownNow();
-        candlesExecutorService = Executors.newFixedThreadPool(2);
-        candlesExecutorService.execute(() -> candlesGrpcService.candlesStream(normalTradingFigi));
+        candlesExecutorService = Executors.newScheduledThreadPool(5);
+        candlesExecutorService.schedule(() -> candlesGrpcService.candlesStream(normalTradingFigi), 2000, TimeUnit.MILLISECONDS);
     }
 
     public void initOrderbookStream() {
+        orderbookGrpcService.shutdown();
         orderbookExecutorService.shutdownNow();
-        orderbookExecutorService = Executors.newFixedThreadPool(2);
-        orderbookExecutorService.execute(() -> orderbookGrpcService.orderBookStream(normalTradingFigi));
+        orderbookExecutorService = Executors.newScheduledThreadPool(5);
+        orderbookExecutorService.schedule(() -> orderbookGrpcService.orderBookStream(normalTradingFigi), 2000, TimeUnit.MILLISECONDS);
     }
 
     public void initTradesStream() {
+        tradesGrpcService.shutdown();
         tradesExecutorService.shutdownNow();
-        tradesExecutorService = Executors.newFixedThreadPool(2);
-        tradesExecutorService.execute(() -> tradesGrpcService.tradesStream(normalTradingFigi));
+        tradesExecutorService = Executors.newScheduledThreadPool(5);
+        tradesExecutorService.schedule(() -> tradesGrpcService.tradesStream(normalTradingFigi), 2000, TimeUnit.MILLISECONDS);
     }
 
     public void initMDStreams() {
@@ -100,10 +105,11 @@ public class StreamService {
             return;
         }
         var needToRefreshStream = false;
-        for (TradingStatusChangedEvent tradingStatusChangedEvent : newFigi) {
+        var cloned = new HashSet<>(newFigi);
+        for (TradingStatusChangedEvent tradingStatusChangedEvent : cloned) {
             var figi = tradingStatusChangedEvent.getFigi();
             var status = tradingStatusChangedEvent.getTradingStatus();
-            var time = tradingStatusChangedEvent.getTime().toString();
+            var time = tradingStatusChangedEvent.getTimeNow().toString();
             if (isNormalTrading(status)) {
                 if (normalTradingFigi.add(figi)) {
                     log.info("trading status was changed to normal for figi {}. Time {}", figi, time);
@@ -116,7 +122,7 @@ public class StreamService {
                 }
             }
         }
-        newFigi.clear();
+        newFigi.removeAll(cloned);
         if (needToRefreshStream) {
             log.info("need to resubscribe");
             initMDStreams();

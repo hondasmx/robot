@@ -24,4 +24,6 @@ public class Instrument {
     private Boolean otcFlag;
 
     private String instrumentStatus;
+
+    private String exchange;
 }

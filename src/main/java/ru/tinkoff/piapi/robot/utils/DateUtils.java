@@ -12,4 +12,12 @@ public class DateUtils {
                 .atZone(ZoneOffset.UTC)
                 .toOffsetDateTime();
     }
+
+    public static String secondsToString(long totalSeconds) {
+        var hours = totalSeconds / 3600;
+        var minutes = (totalSeconds % 3600) / 60;
+        var seconds = totalSeconds % 60;
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
 }

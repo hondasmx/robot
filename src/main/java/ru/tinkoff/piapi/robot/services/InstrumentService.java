@@ -68,6 +68,7 @@ public class InstrumentService {
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
                         .otcFlag(el.getOtcFlag())
                         .tradingStatus(el.getTradingStatus().name())
+                        .exchange(el.getExchange())
                         .build())
                 .collect(Collectors.toList());
         instrumentRepository.addInstruments(instruments);
@@ -85,6 +86,7 @@ public class InstrumentService {
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
                         .otcFlag(el.getOtcFlag())
                         .tradingStatus(el.getTradingStatus().name())
+                        .exchange(el.getExchange())
                         .build())
                 .collect(Collectors.toList());
         instrumentRepository.addInstruments(instruments);
@@ -102,6 +104,7 @@ public class InstrumentService {
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
                         .otcFlag(el.getOtcFlag())
                         .tradingStatus(el.getTradingStatus().name())
+                        .exchange(el.getExchange())
                         .build())
                 .collect(Collectors.toList());
         instrumentRepository.addInstruments(instruments);
@@ -119,6 +122,7 @@ public class InstrumentService {
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
                         .otcFlag(el.getOtcFlag())
                         .tradingStatus(el.getTradingStatus().name())
+                        .exchange(el.getExchange())
                         .build())
                 .collect(Collectors.toList());
         instrumentRepository.addInstruments(instruments);
@@ -136,6 +140,7 @@ public class InstrumentService {
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
                         .otcFlag(el.getOtcFlag())
                         .tradingStatus(el.getTradingStatus().name())
+                        .exchange(el.getExchange())
                         .build())
                 .collect(Collectors.toList());
         instrumentRepository.addInstruments(instruments);

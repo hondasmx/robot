@@ -34,6 +34,7 @@ import ru.tinkoff.piapi.robot.processor.TradesProcessor;
 import ru.tinkoff.piapi.robot.services.events.StreamErrorEvent;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -45,12 +46,13 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
     private final InfoProcessor infoProcessor;
     private final OrderbookProcessor orderbookProcessor;
     private final TradesProcessor tradesProcessor;
-    private final ManagedChannel managedChannel;
+    private ManagedChannel managedChannel;
     private final ApplicationEventPublisher publisher;
 
 
     @Override
     protected MarketDataStreamServiceGrpc.MarketDataStreamServiceStub getStub() {
+        managedChannel = managedChannel();
         return MarketDataStreamServiceGrpc
                 .newStub(managedChannel)
                 .withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture));
@@ -135,6 +137,17 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
         observer.onNext(request);
     }
 
+    public void shutdown() {
+        if (managedChannel != null) {
+            managedChannel.shutdownNow();
+            try {
+                managedChannel.awaitTermination(1000, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Data
     @AllArgsConstructor
     public static class FigiDepth {
@@ -167,6 +180,7 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
         @Override
         public void onError(Throwable t) {
             log.error("onError was invoked. stream: {}, error: {}", streamProcessor.streamName(), t.toString());
+            shutdown();
             publisher.publishEvent(new StreamErrorEvent(streamProcessor.streamName()));
         }
 

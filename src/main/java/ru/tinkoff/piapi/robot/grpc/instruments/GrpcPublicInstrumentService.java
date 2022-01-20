@@ -19,13 +19,13 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceGrpc.InstrumentsServiceBlockingStub> {
 
-    private final ManagedChannel managedChannel;
+    private ManagedChannel managedChannel;
 
     @Override
     protected InstrumentsServiceGrpc.InstrumentsServiceBlockingStub getStub() {
+        managedChannel = managedChannel();
         return InstrumentsServiceGrpc
                 .newBlockingStub(managedChannel)
                 .withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture));
@@ -36,6 +36,7 @@ public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceG
         var request = InstrumentsRequest.newBuilder().setInstrumentStatus(instrumentStatus).build();
         var body = getStubWithHeaders().etfs(request);
         log.info("get etfs completed");
+        managedChannel.shutdownNow();
         return getResponse(body).getResponse().getInstrumentsList();
     }
 
@@ -44,6 +45,7 @@ public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceG
         var request = InstrumentsRequest.newBuilder().setInstrumentStatus(instrumentStatus).build();
         var body = getStubWithHeaders().shares(request);
         log.info("get shares completed");
+        managedChannel.shutdownNow();
         return getResponse(body).getResponse().getInstrumentsList();
     }
 
@@ -52,6 +54,7 @@ public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceG
         var request = InstrumentsRequest.newBuilder().setInstrumentStatus(instrumentStatus).build();
         var body = getStubWithHeaders().currencies(request);
         log.info("get currencies completed");
+        managedChannel.shutdownNow();
         return getResponse(body).getResponse().getInstrumentsList();
     }
 
@@ -60,6 +63,7 @@ public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceG
         var request = InstrumentsRequest.newBuilder().setInstrumentStatus(instrumentStatus).build();
         var body = getStubWithHeaders().futures(request);
         log.info("get futures completed");
+        managedChannel.shutdownNow();
         return getResponse(body).getResponse().getInstrumentsList();
     }
 
@@ -68,6 +72,7 @@ public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceG
         var request = InstrumentsRequest.newBuilder().setInstrumentStatus(instrumentStatus).build();
         var body = getStubWithHeaders().bonds(request);
         log.info("get bonds completed");
+        managedChannel.shutdownNow();
         return getResponse(body).getResponse().getInstrumentsList();
     }
 }

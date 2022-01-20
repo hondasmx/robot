@@ -17,7 +17,7 @@ import java.util.Map;
 public class InstrumentRepositoryImpl implements InstrumentRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
-    private final String INSERT_SQL = "insert into instruments (figi, isin, instrument_type, trading_status, api_trade_flag, otc_flag, instrument_status) values (:figi, :isin, :instrumentType, :tradingStatus, :apiTradeFlag, :otcFlag, :instrumentStatus)" +
+    private final String INSERT_SQL = "insert into instruments (figi, isin, instrument_type, trading_status, api_trade_flag, otc_flag, instrument_status, exchange) values (:figi, :isin, :instrumentType, :tradingStatus, :apiTradeFlag, :otcFlag, :instrumentStatus, :exchange)" +
             "ON CONFLICT (figi) DO UPDATE SET updated_at = now(), trading_status = :tradingStatus, instrument_status = :instrumentStatus";
 
     private final String GET_FIGI = "select figi from instruments where trading_status = :tradingStatus";

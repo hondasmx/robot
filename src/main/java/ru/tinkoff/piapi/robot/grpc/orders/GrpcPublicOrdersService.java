@@ -4,7 +4,6 @@ import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.MetadataUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,15 +21,15 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class GrpcPublicOrdersService extends BaseService<OrdersServiceGrpc.OrdersServiceBlockingStub> {
 
-    private final ManagedChannel managedChannel;
+    private ManagedChannel managedChannel;
     @Value("${auth.account}")
     private String accountId;
 
     @Override
     protected OrdersServiceGrpc.OrdersServiceBlockingStub getStub() {
+        managedChannel = managedChannel();
         return OrdersServiceGrpc
                 .newBlockingStub(managedChannel)
                 .withInterceptors(MetadataUtils.newCaptureMetadataInterceptor(headersCapture, trailersCapture));
@@ -39,6 +38,7 @@ public class GrpcPublicOrdersService extends BaseService<OrdersServiceGrpc.Order
     public List<OrderState> getOrders() {
         var request = GetOrdersRequest.newBuilder().setAccountId(accountId).build();
         var body = getStubWithHeaders().getOrders(request);
+        managedChannel.shutdownNow();
         return getResponse(body).getResponse().getOrdersList();
     }
 

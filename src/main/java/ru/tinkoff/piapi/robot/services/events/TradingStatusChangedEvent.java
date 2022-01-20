@@ -10,5 +10,5 @@ import java.time.Instant;
 public class TradingStatusChangedEvent {
     private String figi;
     private String tradingStatus;
-    private Instant time;
+    private Instant timeNow;
 }

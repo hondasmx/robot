@@ -19,7 +19,7 @@ public class InstrumentScheduler {
     private final TelegramService telegramService;
 
 
-    @Scheduled(cron = "* 22 22 * * *")
+    @Scheduled(cron = "0 22 22 * * *")
     public void baseUnspecifiedInstruments() {
         log.info("job started: baseUnspecifiedInstruments");
         var baseUnspecifiedInstruments = instrumentRepository.getBaseUnspecifiedInstruments();
