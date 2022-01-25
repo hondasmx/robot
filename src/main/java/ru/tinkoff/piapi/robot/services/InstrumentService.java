@@ -36,9 +36,7 @@ public class InstrumentService {
         }
         streamService.collectFigi();
         streamService.initInfoStream();
-        streamService.initCandlesStream();
-        streamService.initOrderbookStream();
-        streamService.initTradesStream();
+        streamService.initMDStreams();
         streamService.initOrdersStream();
     }
 
@@ -64,6 +62,8 @@ public class InstrumentService {
                 .map(el -> Instrument.builder()
                         .figi(el.getFigi())
                         .isin(el.getIsin())
+                        .classCode(el.getClassCode())
+                        .ticker(el.getTicker())
                         .instrumentStatus(instrumentStatus.name())
                         .instrumentType("etf")
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
@@ -82,6 +82,8 @@ public class InstrumentService {
                 .map(el -> Instrument.builder()
                         .figi(el.getFigi())
                         .isin("")
+                        .classCode(el.getClassCode())
+                        .ticker(el.getTicker())
                         .instrumentStatus(instrumentStatus.name())
                         .instrumentType("future")
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
@@ -100,6 +102,8 @@ public class InstrumentService {
                 .map(el -> Instrument.builder()
                         .figi(el.getFigi())
                         .isin(el.getIsin())
+                        .classCode(el.getClassCode())
+                        .ticker(el.getTicker())
                         .instrumentStatus(instrumentStatus.name())
                         .instrumentType("share")
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
@@ -118,6 +122,8 @@ public class InstrumentService {
                 .map(el -> Instrument.builder()
                         .figi(el.getFigi())
                         .isin(el.getIsin())
+                        .classCode(el.getClassCode())
+                        .ticker(el.getTicker())
                         .instrumentStatus(instrumentStatus.name())
                         .instrumentType("currency")
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
@@ -136,6 +142,8 @@ public class InstrumentService {
                 .map(el -> Instrument.builder()
                         .figi(el.getFigi())
                         .isin(el.getIsin())
+                        .classCode(el.getClassCode())
+                        .ticker(el.getTicker())
                         .instrumentStatus(instrumentStatus.name())
                         .instrumentType("bond")
                         .apiTradeFlag(el.getApiTradeAvailableFlag())

@@ -17,12 +17,14 @@ import java.util.Map;
 public class InstrumentRepositoryImpl implements InstrumentRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
-    private final String INSERT_SQL = "insert into instruments (figi, isin, instrument_type, trading_status, api_trade_flag, otc_flag, instrument_status, exchange) values (:figi, :isin, :instrumentType, :tradingStatus, :apiTradeFlag, :otcFlag, :instrumentStatus, :exchange)" +
+    private final String INSERT_SQL = "insert into instruments (figi, isin, class_code, ticker, instrument_type, trading_status, api_trade_flag, otc_flag, instrument_status, exchange) values (:figi, :isin, :classCode, :ticker, :instrumentType, :tradingStatus, :apiTradeFlag, :otcFlag, :instrumentStatus, :exchange)" +
             "ON CONFLICT (figi) DO UPDATE SET updated_at = now(), trading_status = :tradingStatus, instrument_status = :instrumentStatus";
 
     private final String GET_FIGI = "select figi from instruments where trading_status = :tradingStatus";
 
     private final String GET_ALL = "select figi from instruments";
+
+    private final String GET_EXCHANGES = "select distinct exchange from instruments where trading_status = 'SECURITY_TRADING_STATUS_NORMAL_TRADING'";
 
     private final String UPDATE = "UPDATE instruments SET updated_at = now(), trading_status = :tradingStatus where figi = :figi";
 
@@ -68,5 +70,10 @@ public class InstrumentRepositoryImpl implements InstrumentRepository {
     @Override
     public List<Instrument> getBaseUnspecifiedInstruments() {
         return jdbcTemplate.query(GET_BASE_UNSPECIFIED_INSTRUMENTS, new BeanPropertyRowMapper<>(Instrument.class));
+    }
+
+    @Override
+    public List<String> getExchanges() {
+        return jdbcTemplate.query(GET_EXCHANGES, (rs, rowNum) -> rs.getString(1));
     }
 }

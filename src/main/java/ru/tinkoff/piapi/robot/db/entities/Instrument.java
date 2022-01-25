@@ -17,6 +17,10 @@ public class Instrument {
 
     private String isin;
 
+    private String classCode;
+
+    private String ticker;
+
     private String instrumentType;
 
     private Boolean apiTradeFlag;

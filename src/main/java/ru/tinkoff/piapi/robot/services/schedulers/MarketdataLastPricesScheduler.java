@@ -5,9 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.tinkoff.piapi.contract.v1.LastPrice;
+import ru.tinkoff.piapi.contract.v1.Quotation;
 import ru.tinkoff.piapi.robot.grpc.marketdata.GrpcPublicMarketdataService;
 import ru.tinkoff.piapi.robot.services.StreamService;
+import ru.tinkoff.piapi.robot.services.TelegramService;
+import ru.tinkoff.piapi.robot.utils.MoneyUtils;
 
+import java.math.BigDecimal;
+import java.text.MessageFormat;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -20,30 +25,31 @@ import static ru.tinkoff.piapi.robot.utils.DateUtils.secondsToString;
 @RequiredArgsConstructor
 public class MarketdataLastPricesScheduler {
 
+    private static final BigDecimal DEFAULT_DIFF_PERCENT = BigDecimal.valueOf(30);
+    private static final Map<String, Quotation> result = new HashMap<>();
     private final GrpcPublicMarketdataService grpcPublicMarketdataService;
-    private final Map<String, Long> result = new HashMap<>();
     private final StreamService streamService;
+    private final TelegramService telegramService;
 
-    @Scheduled(fixedRate = 1000 * 60 * 5, initialDelay = 1000 * 60 * 5)
+    @Scheduled(fixedRate = 1000 * 3)
     public void lastPriceCheck() {
-        log.info("job started: lastPriceCheck");
+        log.debug("job started: lastPriceCheck");
         var lastPrices = grpcPublicMarketdataService.getLastPrices();
-        var failedFigi = 0;
         for (LastPrice lastPrice : lastPrices) {
             var figi = lastPrice.getFigi();
-            var time = lastPrice.getTime();
-            var newSeconds = time.getSeconds();
+            var currentPrice = lastPrice.getPrice();
             if (result.containsKey(figi)) {
-                var previousSeconds = result.get(figi);
-                if (newSeconds < previousSeconds) {
-                    failedFigi++;
-                    log.error("new time is less then previous. example {}", figi);
+                var prevPrice = result.get(figi);
+                if (MoneyUtils.quotationDiffPercent(currentPrice, prevPrice).compareTo(DEFAULT_DIFF_PERCENT) >= 0) {
+                    var currentPriceBd = MoneyUtils.quotationToBigDecimal(currentPrice);
+                    var prevPriceBd = MoneyUtils.quotationToBigDecimal(prevPrice);
+                    log.error("price with 30% diff for 3 seconds. figi {}. current price {}, previous price {}", figi, currentPriceBd, prevPriceBd);
+                    var telegramMessage = MessageFormat.format("*price with 30% diff for 3 seconds* \n\n figi: {0}\n current price: {1}\n previous price: {2}\n", figi, currentPriceBd, prevPriceBd);
+                    telegramService.sendMessage(telegramMessage);
                 }
-            } else {
-                result.put(figi, newSeconds);
             }
+            result.put(figi, currentPrice);
         }
-//        log.error("new time is less then previous. example {}", result.keySet());
     }
 
     /**

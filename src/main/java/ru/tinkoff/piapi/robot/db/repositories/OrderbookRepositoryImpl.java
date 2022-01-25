@@ -14,12 +14,13 @@ import java.util.Map;
 @Repository
 public class OrderbookRepositoryImpl implements OrderbookRepository {
 
-    private final static String INSERT_ORDERBOOK = "insert into orderbook (figi, timestamp, thread_name) values (:figi, :timestamp, :thread)";
+    private final static String INSERT_ORDERBOOK = "insert into orderbook (figi, timestamp) values (:figi, :timestamp)";
+
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
     public void addOrderbook(String figi, Timestamp timestamp) {
-        var thread =  Thread.currentThread().getName();
-        jdbcTemplate.update(INSERT_ORDERBOOK, Map.of("figi", figi, "timestamp", DateUtils.timestampToDate(timestamp), "thread", thread));
+        jdbcTemplate.update(INSERT_ORDERBOOK, Map.of("figi", figi, "timestamp", DateUtils.timestampToDate(timestamp)));
     }
 }

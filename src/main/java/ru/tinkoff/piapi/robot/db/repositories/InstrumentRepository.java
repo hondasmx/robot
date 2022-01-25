@@ -19,4 +19,6 @@ public interface InstrumentRepository {
     void updateMDTradingStatus(String figi, String tradingStatus);
 
     List<Instrument> getBaseUnspecifiedInstruments();
+
+    List<String> getExchanges();
 }

@@ -14,12 +14,11 @@ import java.util.Map;
 @Repository
 public class TradeRepositoryImpl implements TradeRepository {
 
-    private final static String INSERT_TRADES = "insert into trades (figi, timestamp, thread_name) values (:figi, :timestamp, :thread)";
+    private final static String INSERT_TRADES = "insert into trades (figi, timestamp) values (:figi, :timestamp)";
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
     public void addTrade(String figi, Timestamp timestamp) {
-        var thread =  Thread.currentThread().getName();
-        jdbcTemplate.update(INSERT_TRADES, Map.of("figi", figi, "timestamp", DateUtils.timestampToDate(timestamp), "thread", thread));
+        jdbcTemplate.update(INSERT_TRADES, Map.of("figi", figi, "timestamp", DateUtils.timestampToDate(timestamp)));
     }
 }

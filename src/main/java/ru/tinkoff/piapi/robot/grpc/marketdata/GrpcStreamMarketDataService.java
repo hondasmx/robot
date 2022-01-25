@@ -1,5 +1,6 @@
 package ru.tinkoff.piapi.robot.grpc.marketdata;
 
+import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
@@ -33,6 +34,8 @@ import ru.tinkoff.piapi.robot.processor.marketdata.OrderbookProcessor;
 import ru.tinkoff.piapi.robot.processor.marketdata.TradesProcessor;
 import ru.tinkoff.piapi.robot.services.events.StreamErrorEvent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -165,21 +168,25 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
     @Getter
     public class MarketDataStreamObserver implements StreamObserver<MarketDataResponse> {
         private final MarketdataStreamProcessor streamProcessor;
-
+        private final List<Timestamp> pings;
 
         public MarketDataStreamObserver(MarketdataStreamProcessor streamProcessor) {
             this.streamProcessor = streamProcessor;
-
+            pings = new ArrayList<>();
         }
 
         @Override
         public void onNext(MarketDataResponse value) {
-            streamProcessor.process(value);
+            streamProcessor.process(value, pings);
         }
 
         @Override
         public void onError(Throwable t) {
-            log.error("onError was invoked. stream: {}, error: {}", streamProcessor.streamName(), t.toString());
+            log.error("onError was invoked. stream: {}, error: {}, total pings: {}, last ping: {}",
+                    streamProcessor.streamName(),
+                    t.toString(),
+                    pings.size(),
+                    pings.get(pings.size() - 1));
             shutdown();
             publisher.publishEvent(new StreamErrorEvent(streamProcessor.streamName()));
         }

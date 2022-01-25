@@ -14,14 +14,13 @@ import java.util.Map;
 @Slf4j
 public class CandlesRepositoryImpl implements CandlesRepository {
 
-    private final static String INSERT_CANDLE = "insert into candles (figi, timestamp, thread_name) values (:figi, :timestamp, :thread)";
+    private final static String INSERT_CANDLE = "insert into candles (figi, timestamp) values (:figi, :timestamp)";
     private final static String LAST_CANDLE = "select timestamp from candles order by timestamp desc limit 1";
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
     public void addCandle(String figi, Timestamp timestamp) {
-        var thread = Thread.currentThread().getName();
-        jdbcTemplate.update(INSERT_CANDLE, Map.of("figi", figi, "timestamp", DateUtils.timestampToDate(timestamp), "thread", thread));
+        jdbcTemplate.update(INSERT_CANDLE, Map.of("figi", figi, "timestamp", DateUtils.timestampToDate(timestamp)));
     }
 
     @Override

@@ -30,5 +30,7 @@ public class TelegramService {
 
         private final String chat_id;
 
+        private final String parse_mode = "markdown";
+
     }
 }

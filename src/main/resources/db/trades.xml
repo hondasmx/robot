@@ -10,7 +10,6 @@
                 figi text NOT NULL,
                 timestamp timestamp with time zone NOT NULL,
                 created_at timestamp with time zone DEFAULT now() NOT NULL,
-                thread_name text,
                 PRIMARY KEY (id)
             );
 
