@@ -16,6 +16,7 @@ public class CandlesRepositoryImpl implements CandlesRepository {
 
     private final static String INSERT_CANDLE = "insert into candles (figi, timestamp) values (:figi, :timestamp)";
     private final static String LAST_CANDLE = "select timestamp from candles order by timestamp desc limit 1";
+    private final static String LAST_CANDLE_BY_INSTRUMENT_TYPE = "select max(created_at) from candles join instruments i on candles.figi = i.figi where i.instrument_type = :instrumentType";
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
@@ -26,5 +27,10 @@ public class CandlesRepositoryImpl implements CandlesRepository {
     @Override
     public java.sql.Timestamp lastCandle() {
         return jdbcTemplate.query(LAST_CANDLE, (rs, rowNum) -> rs.getTimestamp(1)).get(0);
+    }
+
+    @Override
+    public java.sql.Timestamp lastCandle(String instrumentType) {
+        return jdbcTemplate.query(LAST_CANDLE_BY_INSTRUMENT_TYPE, Map.of("instrumentType", instrumentType), (rs, rowNum) -> rs.getTimestamp(1)).get(0);
     }
 }

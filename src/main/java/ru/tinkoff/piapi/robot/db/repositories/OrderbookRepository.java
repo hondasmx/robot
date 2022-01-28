@@ -6,4 +6,5 @@ public interface OrderbookRepository {
 
     void addOrderbook(String figi, Timestamp timestamp);
 
+    java.sql.Timestamp lastOrderbook(String instrumentType);
 }

@@ -186,7 +186,7 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
                     streamProcessor.streamName(),
                     t.toString(),
                     pings.size(),
-                    pings.get(pings.size() - 1));
+                    pings.size() > 0 ? pings.get(pings.size() - 1) : null);
             shutdown();
             publisher.publishEvent(new StreamErrorEvent(streamProcessor.streamName()));
         }

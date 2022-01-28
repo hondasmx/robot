@@ -30,4 +30,8 @@ public class Instrument {
     private String instrumentStatus;
 
     private String exchange;
+
+    private Integer lot;
+
+    private String currency;
 }

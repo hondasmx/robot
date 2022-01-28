@@ -7,16 +7,21 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.tinkoff.piapi.contract.v1.SecurityTradingStatus;
 import ru.tinkoff.piapi.robot.db.repositories.InstrumentRepository;
+import ru.tinkoff.piapi.robot.db.repositories.TradingStatusRepository;
 import ru.tinkoff.piapi.robot.grpc.marketdata.GrpcStreamMarketDataService;
 import ru.tinkoff.piapi.robot.grpc.orders.GrpcStreamOrdersService;
 import ru.tinkoff.piapi.robot.processor.StreamNames;
 import ru.tinkoff.piapi.robot.services.events.StreamErrorEvent;
 import ru.tinkoff.piapi.robot.services.events.TradingStatusChangedEvent;
+import ru.tinkoff.piapi.robot.utils.DateUtils;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static ru.tinkoff.piapi.contract.v1.SecurityTradingStatus.SECURITY_TRADING_STATUS_SESSION_OPEN;
 
 @Component
 @Slf4j
@@ -24,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 public class StreamService {
 
     private final InstrumentRepository instrumentRepository;
+    private final TradingStatusRepository tradingStatusRepository;
     private final GrpcStreamMarketDataService candlesGrpcService;
     private final GrpcStreamMarketDataService orderbookGrpcService;
     private final GrpcStreamMarketDataService tradesGrpcService;
@@ -41,7 +47,7 @@ public class StreamService {
 
 
     public void collectFigi() {
-        normalTradingFigi = new HashSet<>(instrumentRepository.figiByTradingStatus(SecurityTradingStatus.SECURITY_TRADING_STATUS_NORMAL_TRADING.name()));
+        normalTradingFigi = new HashSet<>(tradingStatusRepository.figiByTradingStatus(SecurityTradingStatus.SECURITY_TRADING_STATUS_NORMAL_TRADING.name()));
         allFigi = new HashSet<>(instrumentRepository.findAll());
         log.info("normal_trading figi size {}", normalTradingFigi.size());
         log.info("all figi size {}", allFigi.size());
@@ -65,6 +71,11 @@ public class StreamService {
     }
 
     public void initInfoStream() {
+        if (normalTradingFigi.size() == 0) {
+            log.info("normal trading figi size = 0. abort INFO stream initiation");
+            return;
+        }
+
         infoGrpcService.shutdown();
         infoStreamExecutorService.shutdownNow();
         infoStreamExecutorService = Executors.newScheduledThreadPool(2);
@@ -72,6 +83,10 @@ public class StreamService {
     }
 
     public void initCandlesStream() {
+        if (normalTradingFigi.size() == 0) {
+            log.info("normal trading figi size = 0. abort CANDLES stream initiation");
+            return;
+        }
         candlesGrpcService.shutdown();
         candlesExecutorService.shutdownNow();
         candlesExecutorService = Executors.newScheduledThreadPool(2);
@@ -79,6 +94,11 @@ public class StreamService {
     }
 
     public void initOrderbookStream() {
+        if (normalTradingFigi.size() == 0) {
+            log.info("normal trading figi size = 0. abort ORDERBOOK stream initiation");
+            return;
+        }
+
         orderbookGrpcService.shutdown();
         orderbookExecutorService.shutdownNow();
         orderbookExecutorService = Executors.newScheduledThreadPool(2);
@@ -86,6 +106,11 @@ public class StreamService {
     }
 
     public void initTradesStream() {
+        if (normalTradingFigi.size() == 0) {
+            log.info("normal trading figi size = 0. abort TRADES stream initiation");
+            return;
+        }
+
         tradesGrpcService.shutdown();
         tradesExecutorService.shutdownNow();
         tradesExecutorService = Executors.newScheduledThreadPool(2);
@@ -113,17 +138,17 @@ public class StreamService {
         }
         var needToRefreshStream = false;
         var cloned = new HashSet<>(newFigi);
-        for (TradingStatusChangedEvent tradingStatusChangedEvent : cloned) {
-            var figi = tradingStatusChangedEvent.getFigi();
-            var status = tradingStatusChangedEvent.getTradingStatus();
-            var time = tradingStatusChangedEvent.getTimeNow().toString();
+        for (TradingStatusChangedEvent event : cloned) {
+            var figi = event.getFigi();
+            var status = event.getTradingStatus();
+            var time = DateUtils.timestampToDate(event.getTradingStatusUpdatedAt()).toString();
             if (isNormalTrading(status)) {
-                if (normalTradingFigi.add(figi)) {
+                if (!normalTradingFigi.contains(figi)) {
                     log.info("trading status was changed to normal for figi {}. Time {}", figi, time);
                     needToRefreshStream = true;
                 }
             } else {
-                if (normalTradingFigi.remove(figi)) {
+                if (normalTradingFigi.contains(figi)) {
                     log.info("trading status was changed to {} for figi {}. Time {}", status, figi, time);
                     needToRefreshStream = true;
                 }
@@ -132,12 +157,13 @@ public class StreamService {
         newFigi.removeAll(cloned);
         if (needToRefreshStream) {
             log.info("need to resubscribe");
+            collectFigi();
             initMDStreams();
         }
     }
 
     private boolean isNormalTrading(String status) {
-        return SecurityTradingStatus.SECURITY_TRADING_STATUS_NORMAL_TRADING.name().equals(status);
+        return SecurityTradingStatus.SECURITY_TRADING_STATUS_NORMAL_TRADING.name().equals(status) || SECURITY_TRADING_STATUS_SESSION_OPEN.name().equals(status);
     }
 
     @EventListener(TradingStatusChangedEvent.class)

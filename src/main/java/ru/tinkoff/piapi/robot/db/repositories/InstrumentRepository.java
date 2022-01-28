@@ -10,13 +10,9 @@ public interface InstrumentRepository {
 
     void addInstruments(List<Instrument> figis);
 
-    List<String> figiByTradingStatus(String tradingStatus);
+    List<String> figiByInstrumentType(String instrumentType);
 
     List<String> findAll();
-
-    void updateInstrument(String figi, String tradingStatus);
-
-    void updateMDTradingStatus(String figi, String tradingStatus);
 
     List<Instrument> getBaseUnspecifiedInstruments();
 

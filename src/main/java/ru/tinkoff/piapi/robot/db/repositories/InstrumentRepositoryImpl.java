@@ -17,18 +17,17 @@ import java.util.Map;
 public class InstrumentRepositoryImpl implements InstrumentRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
-    private final String INSERT_SQL = "insert into instruments (figi, isin, class_code, ticker, instrument_type, trading_status, api_trade_flag, otc_flag, instrument_status, exchange) values (:figi, :isin, :classCode, :ticker, :instrumentType, :tradingStatus, :apiTradeFlag, :otcFlag, :instrumentStatus, :exchange)" +
-            "ON CONFLICT (figi) DO UPDATE SET updated_at = now(), trading_status = :tradingStatus, instrument_status = :instrumentStatus";
 
-    private final String GET_FIGI = "select figi from instruments where trading_status = :tradingStatus";
+    // insert or replace
+    private final String INSERT_SQL = "insert into instruments (figi, isin, class_code, ticker, instrument_type, api_trade_flag, otc_flag, instrument_status, exchange, lot, currency) values (:figi, :isin, :classCode, :ticker, :instrumentType, :apiTradeFlag, :otcFlag, :instrumentStatus, :exchange, :lot, :currency)" +
+            "ON CONFLICT (figi) DO UPDATE SET ( isin, class_code, ticker, instrument_type, api_trade_flag, otc_flag, instrument_status, exchange, lot, currency) = (excluded.isin, excluded.class_code, excluded.ticker, excluded.instrument_type, excluded.api_trade_flag, excluded.otc_flag, excluded.instrument_status, excluded.exchange, excluded.lot, excluded.currency)";
+
+
+    private final String GET_FIGI_BY_INSTRUMENT_TYPE = "select figi from instruments where instrument_type = :instrumentType";
 
     private final String GET_ALL = "select figi from instruments";
 
     private final String GET_EXCHANGES = "select distinct exchange from instruments where trading_status = 'SECURITY_TRADING_STATUS_NORMAL_TRADING'";
-
-    private final String UPDATE = "UPDATE instruments SET updated_at = now(), trading_status = :tradingStatus where figi = :figi";
-
-    private final String UPDATE_MD_TRADING_STATUS = "UPDATE instruments SET  trading_status_md = :tradingStatus where figi = :figi";
 
     private final String GET_BASE_UNSPECIFIED_INSTRUMENTS = "select *\n" +
             "from instruments\n" +
@@ -47,24 +46,15 @@ public class InstrumentRepositoryImpl implements InstrumentRepository {
         }
     }
 
+
     @Override
-    public List<String> figiByTradingStatus(String tradingStatus) {
-        return jdbcTemplate.query(GET_FIGI, Map.of("tradingStatus", tradingStatus), (rs, rowNum) -> rs.getString(1));
+    public List<String> figiByInstrumentType(String instrumentType) {
+        return jdbcTemplate.query(GET_FIGI_BY_INSTRUMENT_TYPE, Map.of("instrumentType", instrumentType), (rs, rowNum) -> rs.getString(1));
     }
 
     @Override
     public List<String> findAll() {
         return jdbcTemplate.query(GET_ALL, (rs, rowNum) -> rs.getString(1));
-    }
-
-    @Override
-    public void updateInstrument(String figi, String tradingStatus) {
-        jdbcTemplate.update(UPDATE, Map.of("tradingStatus", tradingStatus, "figi", figi));
-    }
-
-    @Override
-    public void updateMDTradingStatus(String figi, String tradingStatus) {
-        jdbcTemplate.update(UPDATE_MD_TRADING_STATUS, Map.of("tradingStatus", tradingStatus, "figi", figi));
     }
 
     @Override

@@ -41,20 +41,6 @@ public class InstrumentService {
     }
 
 
-    public void updateMDTradingStatus() {
-        var figiList = instrumentRepository.findAll();
-        log.info("updating MD trading status for {} figi", figiList.size());
-        for (String figi : figiList) {
-            var tradingStatus = "INSTRUMENT_NOT_FOUND_IN_MARKETDATA";
-            try {
-                tradingStatus = publicMarketdataService.getTradingStatus(figi).name();
-            } catch (StatusRuntimeException exception) {
-                log.error("error getting MD trading status for figi {}", figi);
-            }
-            instrumentRepository.updateMDTradingStatus(figi, tradingStatus);
-        }
-    }
-
     private void getEtfs(InstrumentStatus instrumentStatus) {
         var instruments = publicInstrumentService
                 .getEtfs(instrumentStatus)
@@ -68,8 +54,9 @@ public class InstrumentService {
                         .instrumentType("etf")
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
                         .otcFlag(el.getOtcFlag())
-                        .tradingStatus(el.getTradingStatus().name())
                         .exchange(el.getExchange())
+                        .lot(el.getLot())
+                        .currency(el.getCurrency())
                         .build())
                 .collect(Collectors.toList());
         instrumentRepository.addInstruments(instruments);
@@ -85,11 +72,12 @@ public class InstrumentService {
                         .classCode(el.getClassCode())
                         .ticker(el.getTicker())
                         .instrumentStatus(instrumentStatus.name())
-                        .instrumentType("future")
+                        .instrumentType("futures")
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
                         .otcFlag(el.getOtcFlag())
-                        .tradingStatus(el.getTradingStatus().name())
                         .exchange(el.getExchange())
+                        .lot(el.getLot())
+                        .currency(el.getCurrency())
                         .build())
                 .collect(Collectors.toList());
         instrumentRepository.addInstruments(instruments);
@@ -108,8 +96,9 @@ public class InstrumentService {
                         .instrumentType("share")
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
                         .otcFlag(el.getOtcFlag())
-                        .tradingStatus(el.getTradingStatus().name())
                         .exchange(el.getExchange())
+                        .lot(el.getLot())
+                        .currency(el.getCurrency())
                         .build())
                 .collect(Collectors.toList());
         instrumentRepository.addInstruments(instruments);
@@ -128,8 +117,9 @@ public class InstrumentService {
                         .instrumentType("currency")
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
                         .otcFlag(el.getOtcFlag())
-                        .tradingStatus(el.getTradingStatus().name())
                         .exchange(el.getExchange())
+                        .lot(el.getLot())
+                        .currency(el.getCurrency())
                         .build())
                 .collect(Collectors.toList());
         instrumentRepository.addInstruments(instruments);
@@ -148,8 +138,9 @@ public class InstrumentService {
                         .instrumentType("bond")
                         .apiTradeFlag(el.getApiTradeAvailableFlag())
                         .otcFlag(el.getOtcFlag())
-                        .tradingStatus(el.getTradingStatus().name())
                         .exchange(el.getExchange())
+                        .lot(el.getLot())
+                        .currency(el.getCurrency())
                         .build())
                 .collect(Collectors.toList());
         instrumentRepository.addInstruments(instruments);

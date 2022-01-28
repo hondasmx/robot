@@ -6,4 +6,5 @@ public interface TradeRepository {
 
     void addTrade(String figi, Timestamp timestamp);
 
+    java.sql.Timestamp lastTrade(String instrumentType);
 }

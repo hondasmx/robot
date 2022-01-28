@@ -7,4 +7,6 @@ public interface CandlesRepository {
     void addCandle(String figi, Timestamp timestamp);
 
     java.sql.Timestamp lastCandle();
+
+    java.sql.Timestamp lastCandle(String instrumentType);
 }

@@ -20,7 +20,7 @@ public class OrdersProcessor {
         if (response.hasPing()) {
             pings.add(response.getPing().getTime());
         } else {
-            log.info("body {}", response.getOrderTrades());
+            log.info("{}", response.getOrderTrades());
         }
     }
 

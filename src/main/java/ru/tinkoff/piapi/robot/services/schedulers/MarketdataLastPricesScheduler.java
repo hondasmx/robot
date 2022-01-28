@@ -25,7 +25,7 @@ import static ru.tinkoff.piapi.robot.utils.DateUtils.secondsToString;
 @RequiredArgsConstructor
 public class MarketdataLastPricesScheduler {
 
-    private static final BigDecimal DEFAULT_DIFF_PERCENT = BigDecimal.valueOf(30);
+    private static final BigDecimal DEFAULT_DIFF_PERCENT = BigDecimal.valueOf(60);
     private static final Map<String, Quotation> result = new HashMap<>();
     private final GrpcPublicMarketdataService grpcPublicMarketdataService;
     private final StreamService streamService;
@@ -43,8 +43,8 @@ public class MarketdataLastPricesScheduler {
                 if (MoneyUtils.quotationDiffPercent(currentPrice, prevPrice).compareTo(DEFAULT_DIFF_PERCENT) >= 0) {
                     var currentPriceBd = MoneyUtils.quotationToBigDecimal(currentPrice);
                     var prevPriceBd = MoneyUtils.quotationToBigDecimal(prevPrice);
-                    log.error("price with 30% diff for 3 seconds. figi {}. current price {}, previous price {}", figi, currentPriceBd, prevPriceBd);
-                    var telegramMessage = MessageFormat.format("*price with 30% diff for 3 seconds* \n\n figi: {0}\n current price: {1}\n previous price: {2}\n", figi, currentPriceBd, prevPriceBd);
+                    log.error("price with 60% diff for 3 seconds. figi {}. current price {}, previous price {}", figi, currentPriceBd, prevPriceBd);
+                    var telegramMessage = MessageFormat.format("*price with 60% diff for 3 seconds* \n\n figi: {0}\n current price: {1}\n previous price: {2}\n", figi, currentPriceBd, prevPriceBd);
                     telegramService.sendMessage(telegramMessage);
                 }
             }

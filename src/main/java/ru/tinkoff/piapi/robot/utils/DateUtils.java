@@ -20,4 +20,8 @@ public class DateUtils {
 
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
+
+    public static String millisToString(long totalMillis) {
+        return secondsToString(totalMillis / 1000);
+    }
 }
