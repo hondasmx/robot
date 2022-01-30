@@ -177,7 +177,10 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
 
         @Override
         public void onNext(MarketDataResponse value) {
-            streamProcessor.process(value, pings);
+            if (value.hasPing()) {
+                pings.add(value.getPing().getTime());
+            }
+            streamProcessor.process(value);
         }
 
         @Override

@@ -17,11 +17,13 @@ public class TradingStatusRepositoryImpl implements TradingStatusRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    private final String GET_FIGI_BY_TRADING_STATUS = "select figi, trading_status, max(trading_status_updated_at) from ( " +
-            "                                                                     select figi, trading_status, trading_status_updated_at " +
-            "                                                                     from trading_status " +
-            "                                                                     group by 1, 2, 3 " +
-            ") as t1 where trading_status = :tradingStatus group by 1,2";
+    private final String GET_FIGI_BY_TRADING_STATUS = "Select figi, trading_status, trading_status_updated_at " +
+            "from (select figi, " +
+            "             trading_status, " +
+            "             trading_status_updated_at, " +
+            "             row_number() over (partition by figi order by trading_status_updated_at desc) as num " +
+            "      from trading_status) a " +
+            "where num = 1 and trading_status = 'SECURITY_TRADING_STATUS_NORMAL_TRADING'";
 
     private final String UPDATE_TRADING_STATUS = "INSERT INTO trading_status (updated_at, trading_status, trading_status_updated_at, figi) VALUES  (now(), :tradingStatus, :tradingStatusUpdatedAt, :figi)";
     @Override

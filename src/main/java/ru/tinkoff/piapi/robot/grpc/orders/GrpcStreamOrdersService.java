@@ -71,7 +71,10 @@ public class GrpcStreamOrdersService extends BaseService<OrdersStreamServiceGrpc
 
         @Override
         public void onNext(TradesStreamResponse value) {
-            streamProcessor.process(value, pings);
+            if (value.hasPing()) {
+                pings.add(value.getPing().getTime());
+            }
+            streamProcessor.process(value);
         }
 
         @Override
