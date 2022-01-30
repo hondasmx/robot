@@ -14,7 +14,5 @@ public interface InstrumentRepository {
 
     List<String> findAll();
 
-    List<Instrument> getBaseUnspecifiedInstruments();
-
     List<String> getExchanges();
 }

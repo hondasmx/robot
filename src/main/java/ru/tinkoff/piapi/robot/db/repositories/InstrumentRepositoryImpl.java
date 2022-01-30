@@ -29,11 +29,6 @@ public class InstrumentRepositoryImpl implements InstrumentRepository {
 
     private final String GET_EXCHANGES = "select distinct exchange from instruments where trading_status = 'SECURITY_TRADING_STATUS_NORMAL_TRADING'";
 
-    private final String GET_BASE_UNSPECIFIED_INSTRUMENTS = "select *\n" +
-            "from instruments\n" +
-            "where trading_status = 'SECURITY_TRADING_STATUS_UNSPECIFIED'\n" +
-            "  and instrument_status = 'INSTRUMENT_STATUS_BASE'";
-
     @Override
     public void addInstrument(Instrument instrument) {
         jdbcTemplate.update(INSERT_SQL, new BeanPropertySqlParameterSource(instrument));
@@ -57,10 +52,6 @@ public class InstrumentRepositoryImpl implements InstrumentRepository {
         return jdbcTemplate.query(GET_ALL, (rs, rowNum) -> rs.getString(1));
     }
 
-    @Override
-    public List<Instrument> getBaseUnspecifiedInstruments() {
-        return jdbcTemplate.query(GET_BASE_UNSPECIFIED_INSTRUMENTS, new BeanPropertyRowMapper<>(Instrument.class));
-    }
 
     @Override
     public List<String> getExchanges() {
