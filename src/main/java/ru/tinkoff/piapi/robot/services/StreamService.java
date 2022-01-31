@@ -71,11 +71,6 @@ public class StreamService {
     }
 
     public void initInfoStream() {
-        if (normalTradingFigi.size() == 0) {
-            log.info("normal trading figi size = 0. abort INFO stream initiation");
-            return;
-        }
-
         infoGrpcService.shutdown();
         infoStreamExecutorService.shutdownNow();
         infoStreamExecutorService = Executors.newScheduledThreadPool(2);
