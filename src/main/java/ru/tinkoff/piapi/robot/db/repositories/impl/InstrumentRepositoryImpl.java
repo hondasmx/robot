@@ -1,4 +1,4 @@
-package ru.tinkoff.piapi.robot.db.repositories;
+package ru.tinkoff.piapi.robot.db.repositories.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.tinkoff.piapi.robot.db.entities.Instrument;
+import ru.tinkoff.piapi.robot.db.repositories.InstrumentRepository;
 
 import java.util.List;
 import java.util.Map;

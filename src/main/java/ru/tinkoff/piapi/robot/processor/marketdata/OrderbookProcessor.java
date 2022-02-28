@@ -22,6 +22,9 @@ public class OrderbookProcessor implements MarketdataStreamProcessor {
             var orderbook = response.getOrderbook();
             var figi = orderbook.getFigi();
             var time = orderbook.getTime();
+//            var bids = orderbook.getBidsCount();
+//            var asks = orderbook.getAsksCount();
+//            log.info("bids {}, asks {}", bids, asks);
             orderbookRepository.addOrderbook(figi, time);
         } else if (response.hasSubscribeOrderBookResponse()) {
             var count = response.getSubscribeOrderBookResponse().getOrderBookSubscriptionsList().stream().filter(el -> el.getSubscriptionStatus().equals(SubscriptionStatus.SUBSCRIPTION_STATUS_SUCCESS)).count();

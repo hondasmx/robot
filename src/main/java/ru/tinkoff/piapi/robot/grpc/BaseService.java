@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 
 import javax.net.ssl.SSLException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -59,6 +60,7 @@ public abstract class BaseService<T extends AbstractStub<T>> {
         return NettyChannelBuilder
                 .forAddress(url, Integer.parseInt(port))
                 .sslContext(createSslContext())
+                .keepAliveTimeout(60, TimeUnit.SECONDS)
                 .negotiationType(NegotiationType.TLS)
                 .build();
     }

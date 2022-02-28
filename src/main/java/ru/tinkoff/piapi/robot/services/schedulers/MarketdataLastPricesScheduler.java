@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.tinkoff.piapi.contract.v1.LastPrice;
 import ru.tinkoff.piapi.contract.v1.Quotation;
+import ru.tinkoff.piapi.robot.db.repositories.LastPricesRepository;
 import ru.tinkoff.piapi.robot.grpc.marketdata.GrpcPublicMarketdataService;
 import ru.tinkoff.piapi.robot.services.StreamService;
 import ru.tinkoff.piapi.robot.services.TelegramService;
@@ -30,18 +31,21 @@ public class MarketdataLastPricesScheduler {
     private final GrpcPublicMarketdataService grpcPublicMarketdataService;
     private final StreamService streamService;
     private final TelegramService telegramService;
+    private final LastPricesRepository lastPricesRepository;
 
-    @Scheduled(fixedRate = 1000 * 3)
+    @Scheduled(fixedRate = 1000 * 60)
     public void lastPriceCheck() {
         log.debug("job started: lastPriceCheck");
         var lastPrices = grpcPublicMarketdataService.getLastPrices();
         for (LastPrice lastPrice : lastPrices) {
+            lastPricesRepository.addLastPrice(lastPrice);
             var figi = lastPrice.getFigi();
             var currentPrice = lastPrice.getPrice();
+            var currentPriceBd = MoneyUtils.quotationToBigDecimal(currentPrice);
+
             if (result.containsKey(figi)) {
                 var prevPrice = result.get(figi);
                 if (MoneyUtils.quotationDiffPercent(currentPrice, prevPrice).compareTo(DEFAULT_DIFF_PERCENT) >= 0) {
-                    var currentPriceBd = MoneyUtils.quotationToBigDecimal(currentPrice);
                     var prevPriceBd = MoneyUtils.quotationToBigDecimal(prevPrice);
                     log.error("price with 60% diff for 3 seconds. figi {}. current price {}, previous price {}", figi, currentPriceBd, prevPriceBd);
                     var telegramMessage = MessageFormat.format("*price with 60% diff for 3 seconds* \n\n figi: {0}\n current price: {1}\n previous price: {2}\n", figi, currentPriceBd, prevPriceBd);

@@ -111,7 +111,7 @@ public class GrpcStreamMarketDataService extends BaseService<MarketDataStreamSer
         for (String figi : figis) {
             orderBookBuilder.addInstruments(OrderBookInstrument
                     .newBuilder()
-                    .setDepth(50)
+                    .setDepth(1)
                     .setFigi(figi)
                     .build());
         }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.tinkoff.piapi.contract.v1.MarketDataResponse;
 import ru.tinkoff.piapi.contract.v1.SubscriptionStatus;
 import ru.tinkoff.piapi.robot.db.repositories.TradeRepository;
+import ru.tinkoff.piapi.robot.utils.MoneyUtils;
 
 import static ru.tinkoff.piapi.robot.processor.StreamNames.TRADES;
 
@@ -20,10 +21,13 @@ public class TradesProcessor implements MarketdataStreamProcessor {
     @Override
     public void process(MarketDataResponse response) {
         if (response.hasTrade()) {
-            var orderbook = response.getTrade();
-            var figi = orderbook.getFigi();
-            var time = orderbook.getTime();
-            repository.addTrade(figi, time);
+            var trade = response.getTrade();
+            var figi = trade.getFigi();
+            var time = trade.getTime();
+            var direction = trade.getDirection().name();
+            var lot = trade.getQuantity();
+            var price = MoneyUtils.quotationToBigDecimal(trade.getPrice());
+            repository.addTrade(figi, time, direction, lot, price);
         } else if (response.hasSubscribeTradesResponse()) {
             var count = response.getSubscribeTradesResponse().getTradeSubscriptionsList().stream().filter(el -> el.getSubscriptionStatus().equals(SubscriptionStatus.SUBSCRIPTION_STATUS_SUCCESS)).count();
             log.info("success trades subscriptions: {}", count);

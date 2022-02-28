@@ -1,10 +1,11 @@
-package ru.tinkoff.piapi.robot.db.repositories;
+package ru.tinkoff.piapi.robot.db.repositories.impl;
 
 import com.google.protobuf.Timestamp;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.tinkoff.piapi.robot.db.repositories.OrderbookRepository;
 import ru.tinkoff.piapi.robot.utils.DateUtils;
 
 import java.util.Map;

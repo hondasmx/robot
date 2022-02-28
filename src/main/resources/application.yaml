@@ -20,17 +20,6 @@ spring:
     enabled: true
     change-log: classpath:changelog.xml
 
-config:
-  candles:
-    db-write-enabled: true
-    stream-count: 5
-  orderbook:
-    db-write-enabled: true
-    stream-count: 5
-  trades:
-    db-write-enabled: true
-    stream-count: 5
-
 management:
   endpoints:
     web:

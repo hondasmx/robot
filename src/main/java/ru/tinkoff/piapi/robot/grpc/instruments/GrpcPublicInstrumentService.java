@@ -14,14 +14,17 @@ import ru.tinkoff.piapi.contract.v1.InstrumentsRequest;
 import ru.tinkoff.piapi.contract.v1.InstrumentsServiceGrpc;
 import ru.tinkoff.piapi.contract.v1.Share;
 import ru.tinkoff.piapi.robot.grpc.BaseService;
+import ru.tinkoff.piapi.robot.utils.Helpers;
 
 import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceGrpc.InstrumentsServiceBlockingStub> {
 
     private ManagedChannel managedChannel;
+    private final Helpers helpers;
 
     @Override
     protected InstrumentsServiceGrpc.InstrumentsServiceBlockingStub getStub() {
@@ -34,7 +37,7 @@ public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceG
     public List<Etf> getEtfs(InstrumentStatus instrumentStatus) {
         log.info("get etfs started. status {}", instrumentStatus.name());
         var request = InstrumentsRequest.newBuilder().setInstrumentStatus(instrumentStatus).build();
-        var body = getStubWithHeaders().etfs(request);
+        var body = helpers.unaryCall(() -> getStubWithHeaders().etfs(request));
         log.info("get etfs completed");
         managedChannel.shutdownNow();
         return getResponse(body).getResponse().getInstrumentsList();
@@ -43,7 +46,7 @@ public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceG
     public List<Share> getShares(InstrumentStatus instrumentStatus) {
         log.info("get shares started. status {}", instrumentStatus.name());
         var request = InstrumentsRequest.newBuilder().setInstrumentStatus(instrumentStatus).build();
-        var body = getStubWithHeaders().shares(request);
+        var body = helpers.unaryCall(() -> getStubWithHeaders().shares(request));
         log.info("get shares completed");
         managedChannel.shutdownNow();
         return getResponse(body).getResponse().getInstrumentsList();
@@ -52,7 +55,7 @@ public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceG
     public List<Currency> getCurrencies(InstrumentStatus instrumentStatus) {
         log.info("get currencies started. status {}", instrumentStatus.name());
         var request = InstrumentsRequest.newBuilder().setInstrumentStatus(instrumentStatus).build();
-        var body = getStubWithHeaders().currencies(request);
+        var body = helpers.unaryCall(() -> getStubWithHeaders().currencies(request));
         log.info("get currencies completed");
         managedChannel.shutdownNow();
         return getResponse(body).getResponse().getInstrumentsList();
@@ -61,7 +64,7 @@ public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceG
     public List<Future> getFutures(InstrumentStatus instrumentStatus) {
         log.info("get futures started. status {}", instrumentStatus.name());
         var request = InstrumentsRequest.newBuilder().setInstrumentStatus(instrumentStatus).build();
-        var body = getStubWithHeaders().futures(request);
+        var body = helpers.unaryCall(() -> getStubWithHeaders().futures(request));
         log.info("get futures completed");
         managedChannel.shutdownNow();
         return getResponse(body).getResponse().getInstrumentsList();
@@ -70,7 +73,7 @@ public class GrpcPublicInstrumentService extends BaseService<InstrumentsServiceG
     public List<Bond> getBonds(InstrumentStatus instrumentStatus) {
         log.info("get bonds started. status {}", instrumentStatus.name());
         var request = InstrumentsRequest.newBuilder().setInstrumentStatus(instrumentStatus).build();
-        var body = getStubWithHeaders().bonds(request);
+        var body = helpers.unaryCall(() -> getStubWithHeaders().bonds(request));
         log.info("get bonds completed");
         managedChannel.shutdownNow();
         return getResponse(body).getResponse().getInstrumentsList();
