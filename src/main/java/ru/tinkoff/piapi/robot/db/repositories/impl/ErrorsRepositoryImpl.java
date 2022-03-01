@@ -13,13 +13,13 @@ import java.util.Map;
 @Repository
 public class ErrorsRepositoryImpl implements ErrorsRepository {
 
-    private final static String INSERT = "insert into errors (exception_type, message) values (:exceptionType, :message)";
+    private final static String INSERT = "insert into errors (exception_class, message) values (:exceptionClass, :message)";
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
-    public void add(String exceptionType, String message) {
+    public void add(String exceptionClass, String message) {
         jdbcTemplate.update(INSERT, Map.of(
-                "exceptionType", exceptionType,
+                "exceptionClass", exceptionClass,
                 "message", message
         ));
     }

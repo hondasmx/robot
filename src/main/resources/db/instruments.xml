@@ -13,11 +13,11 @@
                 ticker            text                                     NOT NULL,
                 class_code        text                                     NOT NULL,
                 instrument_type   text,
-                api_trade_flag    text,
+                api_trade_flag    Boolean,
                 instrument_status text,
                 lot               integer,
                 currency          text,
-                otc_flag          text,
+                otc_flag          Boolean,
                 exchange          text,
                 PRIMARY KEY (id)
             );

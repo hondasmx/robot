@@ -1,6 +1,5 @@
 package ru.tinkoff.piapi.robot.services;
 
-import io.grpc.StatusRuntimeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -10,7 +9,6 @@ import ru.tinkoff.piapi.contract.v1.InstrumentStatus;
 import ru.tinkoff.piapi.robot.db.entities.Instrument;
 import ru.tinkoff.piapi.robot.db.repositories.InstrumentRepository;
 import ru.tinkoff.piapi.robot.grpc.instruments.GrpcPublicInstrumentService;
-import ru.tinkoff.piapi.robot.grpc.marketdata.GrpcPublicMarketdataService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +19,6 @@ import java.util.stream.Collectors;
 public class InstrumentService {
 
     private final GrpcPublicInstrumentService publicInstrumentService;
-    private final GrpcPublicMarketdataService publicMarketdataService;
     private final InstrumentRepository instrumentRepository;
     private final StreamService streamService;
 
