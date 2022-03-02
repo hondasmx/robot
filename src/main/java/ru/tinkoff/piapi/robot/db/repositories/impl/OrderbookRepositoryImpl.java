@@ -29,7 +29,7 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
 
     private final static String FAILED_ORDERBOOK = "select * from orderbook where now()::timestamptz - created_at <= interval '10 minutes' and bid > ask";
 
-    private final static String TIME_DIFF_ORDERBOOK = "select figi, created_at, timestamp, created_at - timestamp as diff from orderbook where now()::timestamptz - created_at <= interval '10 minutes' and created_at - timestamp >= interval '5 minutes'";
+    private final static String TIME_DIFF_ORDERBOOK = "select figi, created_at, timestamp, EXTRACT(EPOCH FROM (created_at::timestamp - timestamp::timestamp)) as diff from orderbook where now()::timestamptz - created_at <= interval '10 minutes' and created_at - timestamp >= interval '5 minutes'";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -75,7 +75,7 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
         return jdbcTemplate.query(TIME_DIFF_ORDERBOOK, new HashMap<>(), (rs, rowNum) -> new TimeDiffResponse(
                 rs.getString("figi"),
                 rs.getTimestamp("timestamp"),
-                DateUtils.millisToString(rs.getTimestamp("diff").getTime())
+                DateUtils.secondsToString(rs.getInt("diff"))
         ));
     }
 
