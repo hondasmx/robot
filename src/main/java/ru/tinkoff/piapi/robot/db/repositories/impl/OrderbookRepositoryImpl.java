@@ -16,6 +16,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -27,6 +28,8 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
     private final static String LAST_ORDERBOOK_BY_INSTRUMENT_TYPE = "select max(created_at) from orderbook join instruments i on orderbook.figi = i.figi where i.instrument_type = :instrumentType";
 
     private final static String FAILED_ORDERBOOK = "select * from orderbook where now()::timestamptz - created_at <= interval '10 minutes' and bid > ask";
+
+    private final static String TIME_DIFF_ORDERBOOK = "select figi, created_at, timestamp, created_at - timestamp as diff from orderbook where now()::timestamptz - created_at <= interval '10 minutes' and created_at - timestamp >= interval '5 minutes'";
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
@@ -57,8 +60,8 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
     }
 
     @Override
-    public List<OrderboookResponse> failedOrderbook() {
-        return jdbcTemplate.query(FAILED_ORDERBOOK, new HashMap<>(), (rs, rowNum) -> new OrderboookResponse(
+    public List<OrderbookResponse> failedOrderbook() {
+        return jdbcTemplate.query(FAILED_ORDERBOOK, new HashMap<>(), (rs, rowNum) -> new OrderbookResponse(
                 rs.getBigDecimal("bid"),
                 rs.getBigDecimal("ask"),
                 rs.getString("figi"),
@@ -67,13 +70,30 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
         ));
     }
 
+    @Override
+    public List<TimeDiffResponse> timeDiffOrderbook() {
+        return jdbcTemplate.query(TIME_DIFF_ORDERBOOK, new HashMap<>(), (rs, rowNum) -> new TimeDiffResponse(
+                rs.getString("figi"),
+                rs.getTimestamp("timestamp"),
+                DateUtils.millisToString(rs.getTimestamp("diff").getTime())
+        ));
+    }
+
     @Data
     @AllArgsConstructor
-    public static class OrderboookResponse {
+    public static class OrderbookResponse {
         BigDecimal bid;
         BigDecimal ask;
         String figi;
         Timestamp timestamp;
         Timestamp createdAt;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class TimeDiffResponse {
+        String figi;
+        Timestamp timestamp;
+        String diff;
     }
 }

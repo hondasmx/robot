@@ -11,5 +11,8 @@ public interface OrderbookRepository {
 
     java.sql.Timestamp lastOrderbook(String instrumentType);
 
-    List<OrderbookRepositoryImpl.OrderboookResponse> failedOrderbook();
+    List<OrderbookRepositoryImpl.OrderbookResponse> failedOrderbook();
+
+    List<OrderbookRepositoryImpl.TimeDiffResponse> timeDiffOrderbook();
+
 }
