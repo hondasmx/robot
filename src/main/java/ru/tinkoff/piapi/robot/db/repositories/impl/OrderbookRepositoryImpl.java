@@ -2,6 +2,7 @@ package ru.tinkoff.piapi.robot.db.repositories.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -27,7 +28,7 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
 
     private final static String LAST_ORDERBOOK_BY_INSTRUMENT_TYPE = "select max(created_at) from orderbook join instruments i on orderbook.figi = i.figi where i.instrument_type = :instrumentType";
 
-    private final static String FAILED_ORDERBOOK = "select * from orderbook where now()::timestamptz - created_at <= interval '10 minutes' and bid > ask";
+    private final static String FAILED_ORDERBOOK = "select * from orderbook where now()::timestamptz - created_at <= interval '10 minutes' and bid > ask and ask != 0 and bid != 0";
 
     private final static String TIME_DIFF_ORDERBOOK = "select figi, created_at, timestamp, EXTRACT(EPOCH FROM (created_at::timestamp - timestamp::timestamp)) as diff from orderbook where now()::timestamptz - created_at <= interval '10 minutes' and created_at - timestamp >= interval '5 minutes'";
 
@@ -81,6 +82,7 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
 
     @Data
     @AllArgsConstructor
+    @EqualsAndHashCode(of = {"bid", "ask", "figi"})
     public static class OrderbookResponse {
         BigDecimal bid;
         BigDecimal ask;

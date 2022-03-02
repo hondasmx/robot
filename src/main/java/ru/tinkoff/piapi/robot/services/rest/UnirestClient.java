@@ -23,6 +23,7 @@ public class UnirestClient {
                 .asJson()
                 .ifFailure(response -> {
                     log.error("Oh No! Status: " + response.getStatus());
+                    log.error("error description: {}", response.getBody().getObject().getString("description"));
                     response.getParsingError().ifPresent(e -> {
                         log.error("Parsing Exception: ", e);
                         log.error("Original body: " + e.getOriginalBody());
