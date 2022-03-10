@@ -15,9 +15,10 @@ import ru.tinkoff.piapi.robot.utils.MoneyUtils;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -72,17 +73,17 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
     }
 
     @Override
-    public List<TimeDiffResponse> timeDiffOrderbook() {
-        return jdbcTemplate.query(TIME_DIFF_ORDERBOOK, new HashMap<>(), (rs, rowNum) -> new TimeDiffResponse(
+    public Set<TimeDiffResponse> timeDiffOrderbook() {
+        return new HashSet<>(jdbcTemplate.query(TIME_DIFF_ORDERBOOK, new HashMap<>(), (rs, rowNum) -> new TimeDiffResponse(
                 rs.getString("figi"),
                 rs.getTimestamp("timestamp"),
                 DateUtils.secondsToString(rs.getInt("diff"))
-        ));
+        )));
     }
 
     @Data
     @AllArgsConstructor
-    @EqualsAndHashCode(of = {"bid", "ask", "figi"})
+    @EqualsAndHashCode(of = {"figi"})
     public static class OrderbookResponse {
         BigDecimal bid;
         BigDecimal ask;
@@ -93,6 +94,7 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
 
     @Data
     @AllArgsConstructor
+    @EqualsAndHashCode(of = {"figi"})
     public static class TimeDiffResponse {
         String figi;
         Timestamp timestamp;
