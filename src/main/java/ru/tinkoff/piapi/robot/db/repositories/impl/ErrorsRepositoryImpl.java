@@ -13,7 +13,7 @@ import java.util.Map;
 @Repository
 public class ErrorsRepositoryImpl implements ErrorsRepository {
 
-    private final static String INSERT = "insert into errors (exception_class, message) values (:exceptionClass, :message)";
+    private final static String INSERT = "insert into errors (exception_class, error_message) values (:exceptionClass, :message)";
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
