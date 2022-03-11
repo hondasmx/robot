@@ -81,4 +81,8 @@ public abstract class BaseService<T extends AbstractStub<T>> {
             return null;
         }
     }
+
+    public void shutdown() {
+
+    }
 }

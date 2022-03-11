@@ -6,13 +6,14 @@ import org.springframework.stereotype.Component;
 import ru.tinkoff.piapi.contract.v1.MarketDataResponse;
 import ru.tinkoff.piapi.contract.v1.SubscriptionStatus;
 import ru.tinkoff.piapi.robot.db.repositories.OrderbookRepository;
+import ru.tinkoff.piapi.robot.processor.StreamProcessor;
 
 import static ru.tinkoff.piapi.robot.processor.StreamNames.ORDERBOOK;
 
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class OrderbookProcessor implements MarketdataStreamProcessor {
+public class OrderbookProcessor implements StreamProcessor<MarketDataResponse> {
 
     private final OrderbookRepository orderbookRepository;
 

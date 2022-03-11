@@ -4,6 +4,7 @@ import ru.tinkoff.piapi.contract.v1.OrderBook;
 import ru.tinkoff.piapi.robot.db.repositories.impl.OrderbookRepositoryImpl;
 
 import java.util.List;
+import java.util.Set;
 
 public interface OrderbookRepository {
 
@@ -13,6 +14,6 @@ public interface OrderbookRepository {
 
     List<OrderbookRepositoryImpl.OrderbookResponse> failedOrderbook();
 
-    List<OrderbookRepositoryImpl.TimeDiffResponse> timeDiffOrderbook();
+    Set<OrderbookRepositoryImpl.TimeDiffResponse> timeDiffOrderbook();
 
 }

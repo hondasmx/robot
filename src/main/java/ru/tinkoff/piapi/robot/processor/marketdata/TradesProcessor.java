@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.tinkoff.piapi.contract.v1.MarketDataResponse;
 import ru.tinkoff.piapi.contract.v1.SubscriptionStatus;
 import ru.tinkoff.piapi.robot.db.repositories.TradeRepository;
+import ru.tinkoff.piapi.robot.processor.StreamProcessor;
 import ru.tinkoff.piapi.robot.utils.MoneyUtils;
 
 import static ru.tinkoff.piapi.robot.processor.StreamNames.TRADES;
@@ -13,7 +14,7 @@ import static ru.tinkoff.piapi.robot.processor.StreamNames.TRADES;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class TradesProcessor implements MarketdataStreamProcessor {
+public class TradesProcessor implements StreamProcessor<MarketDataResponse> {
 
     private final TradeRepository repository;
 
