@@ -40,6 +40,10 @@ public class MarketdataLastPricesScheduler {
         for (LastPrice lastPrice : lastPrices) {
             lastPricesRepository.addLastPrice(lastPrice);
             var figi = lastPrice.getFigi();
+            var normalTradingFigi = new HashSet<>(streamService.normalTradingFigi);
+            if (!normalTradingFigi.contains(figi)) {
+                continue;
+            }
             var currentPrice = lastPrice.getPrice();
             var currentPriceBd = MoneyUtils.quotationToBigDecimal(currentPrice);
 

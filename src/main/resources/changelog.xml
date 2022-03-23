@@ -8,4 +8,5 @@
     <include file="db/trading_status.xml"/>
     <include file="db/last_prices.xml"/>
     <include file="db/errors.xml"/>
+    <include file="db/15.03.2022/limitUp_limitDown.xml"/>
 </databaseChangeLog>

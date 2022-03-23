@@ -25,7 +25,7 @@ import java.util.Set;
 @Repository
 public class OrderbookRepositoryImpl implements OrderbookRepository {
 
-    private final static String INSERT_ORDERBOOK = "insert into orderbook (figi, timestamp, bid, ask, is_consistent) values (:figi, :timestamp, :bid, :ask, :isConsistent)";
+    private final static String INSERT_ORDERBOOK = "insert into orderbook (figi, timestamp, bid, ask, is_consistent, limit_up, limit_down) values (:figi, :timestamp, :bid, :ask, :isConsistent, :limitUp, :limitDown)";
 
     private final static String LAST_ORDERBOOK_BY_INSTRUMENT_TYPE = "select max(created_at) from orderbook join instruments i on orderbook.figi = i.figi where i.instrument_type = :instrumentType";
 
@@ -46,12 +46,17 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
         var asks = orderbook.getAsksList();
         var lastAsk = asks.size() > 0 ? MoneyUtils.quotationToBigDecimal(asks.get(0).getPrice()) : BigDecimal.ZERO;
 
+        var limitUp = MoneyUtils.quotationToBigDecimal(orderbook.getLimitUp());
+        var limitDown = MoneyUtils.quotationToBigDecimal(orderbook.getLimitDown());
+
         var isConsistent = orderbook.getIsConsistent();
         jdbcTemplate.update(INSERT_ORDERBOOK, Map.of(
                 "figi", figi,
                 "timestamp", DateUtils.timestampToDate(time),
                 "bid", lastBid,
                 "ask", lastAsk,
+                "limitUp", limitUp,
+                "limitDown", limitDown,
                 "isConsistent", isConsistent
         ));
     }
