@@ -5,7 +5,7 @@
 
     <changeSet id="2022-03-15" author="hondasmx">
         <sql>
-            ALTER TABLE orderbook ADD COLUMN limit_up real, ADD COLUMN limit_down real;
+            ALTER TABLE orderbook ADD COLUMN IF NOT EXISTS limit_up real, ADD COLUMN IF NOT EXISTS limit_down real;
 
         </sql>
     </changeSet>

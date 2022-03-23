@@ -28,7 +28,6 @@ public class InstrumentRepositoryImpl implements InstrumentRepository {
 
     private final String GET_ALL = "select figi from instruments";
 
-    private final String GET_EXCHANGES = "select distinct exchange from instruments where trading_status = 'SECURITY_TRADING_STATUS_NORMAL_TRADING'";
 
     @Override
     public void addInstrument(Instrument instrument) {
@@ -51,11 +50,5 @@ public class InstrumentRepositoryImpl implements InstrumentRepository {
     @Override
     public List<String> findAll() {
         return jdbcTemplate.query(GET_ALL, (rs, rowNum) -> rs.getString(1));
-    }
-
-
-    @Override
-    public List<String> getExchanges() {
-        return jdbcTemplate.query(GET_EXCHANGES, (rs, rowNum) -> rs.getString(1));
     }
 }

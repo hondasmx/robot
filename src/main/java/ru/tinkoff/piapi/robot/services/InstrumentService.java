@@ -5,10 +5,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import ru.tinkoff.piapi.contract.v1.Bond;
+import ru.tinkoff.piapi.contract.v1.Currency;
+import ru.tinkoff.piapi.contract.v1.Etf;
+import ru.tinkoff.piapi.contract.v1.Future;
 import ru.tinkoff.piapi.contract.v1.InstrumentStatus;
+import ru.tinkoff.piapi.contract.v1.Share;
+import ru.tinkoff.piapi.core.InstrumentsService;
 import ru.tinkoff.piapi.robot.db.entities.Instrument;
 import ru.tinkoff.piapi.robot.db.repositories.InstrumentRepository;
-import ru.tinkoff.piapi.robot.grpc.instruments.GrpcPublicInstrumentService;
+import ru.tinkoff.piapi.robot.grpc.SdkService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,9 +24,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InstrumentService {
 
-    private final GrpcPublicInstrumentService publicInstrumentService;
     private final InstrumentRepository instrumentRepository;
     private final StreamService streamService;
+    private final SdkService sdkService;
+
+
+    private InstrumentsService getInstrumentService() {
+        return sdkService.getInvestApi().getInstrumentsService();
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void initInstruments() {
@@ -37,10 +48,14 @@ public class InstrumentService {
         streamService.initOrdersStream();
     }
 
-
     private void getEtfs(InstrumentStatus instrumentStatus) {
-        var instruments = publicInstrumentService
-                .getEtfs(instrumentStatus)
+        List<Etf> etfs;
+        if (instrumentStatus == InstrumentStatus.INSTRUMENT_STATUS_ALL) {
+            etfs = getInstrumentService().getAllEtfsSync();
+        } else {
+            etfs = getInstrumentService().getTradableEtfsSync();
+        }
+        var instruments = etfs
                 .stream()
                 .map(el -> Instrument.builder()
                         .figi(el.getFigi())
@@ -59,9 +74,15 @@ public class InstrumentService {
         instrumentRepository.addInstruments(instruments);
     }
 
+
     private void getFutures(InstrumentStatus instrumentStatus) {
-        var instruments = publicInstrumentService
-                .getFutures(instrumentStatus)
+        List<Future> futures;
+        if (instrumentStatus == InstrumentStatus.INSTRUMENT_STATUS_ALL) {
+            futures = getInstrumentService().getAllFuturesSync();
+        } else {
+            futures = getInstrumentService().getTradableFuturesSync();
+        }
+        var instruments = futures
                 .stream()
                 .map(el -> Instrument.builder()
                         .figi(el.getFigi())
@@ -81,8 +102,13 @@ public class InstrumentService {
     }
 
     private void getShares(InstrumentStatus instrumentStatus) {
-        var instruments = publicInstrumentService
-                .getShares(instrumentStatus)
+        List<Share> futures;
+        if (instrumentStatus == InstrumentStatus.INSTRUMENT_STATUS_ALL) {
+            futures = getInstrumentService().getAllSharesSync();
+        } else {
+            futures = getInstrumentService().getTradableSharesSync();
+        }
+        var instruments = futures
                 .stream()
                 .map(el -> Instrument.builder()
                         .figi(el.getFigi())
@@ -102,8 +128,13 @@ public class InstrumentService {
     }
 
     private void getCurrencies(InstrumentStatus instrumentStatus) {
-        var instruments = publicInstrumentService
-                .getCurrencies(instrumentStatus)
+        List<Currency> currencies;
+        if (instrumentStatus == InstrumentStatus.INSTRUMENT_STATUS_ALL) {
+            currencies = getInstrumentService().getAllCurrenciesSync();
+        } else {
+            currencies = getInstrumentService().getTradableCurrenciesSync();
+        }
+        var instruments = currencies
                 .stream()
                 .map(el -> Instrument.builder()
                         .figi(el.getFigi())
@@ -123,8 +154,13 @@ public class InstrumentService {
     }
 
     private void getBonds(InstrumentStatus instrumentStatus) {
-        var instruments = publicInstrumentService
-                .getBonds(instrumentStatus)
+        List<Bond> bonds;
+        if (instrumentStatus == InstrumentStatus.INSTRUMENT_STATUS_ALL) {
+            bonds = getInstrumentService().getAllBondsSync();
+        } else {
+            bonds = getInstrumentService().getTradableBondsSync();
+        }
+        var instruments = bonds
                 .stream()
                 .map(el -> Instrument.builder()
                         .figi(el.getFigi())

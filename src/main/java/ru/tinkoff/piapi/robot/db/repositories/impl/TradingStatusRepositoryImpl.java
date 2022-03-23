@@ -18,24 +18,34 @@ public class TradingStatusRepositoryImpl implements TradingStatusRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    private final String GET_FIGI_BY_TRADING_STATUS = "Select figi, trading_status, trading_status_updated_at " +
-            "from (select figi, " +
-            "             trading_status, " +
-            "             trading_status_updated_at, " +
-            "             row_number() over (partition by figi order by trading_status_updated_at desc) as num " +
-            "      from trading_status) a " +
-            "where num = 1 and trading_status = 'SECURITY_TRADING_STATUS_NORMAL_TRADING'";
+    private final String GET_FIGI_BY_TRADING_STATUS = "Select figi from trading_status where status = :status";
 
-    private final String UPDATE_TRADING_STATUS = "INSERT INTO trading_status (updated_at, trading_status, trading_status_updated_at, figi) VALUES  (now(), :tradingStatus, :tradingStatusUpdatedAt, :figi)";
+    private final String ADD_TRADING_STATUS_HISTORY = "INSERT INTO trading_status_history (updated_at, status, status_updated_at, figi) VALUES  (now(), :status, :statusUpdatedAt, :figi)";
+
+    private final String ADD_TRADING_STATUS = "INSERT INTO trading_status (figi, status) VALUES  (:figi, :status) " +
+            "ON CONFLICT (figi) DO UPDATE SET status = :status";
+
     @Override
     public void addTradingStatus(String figi, String tradingStatus, Timestamp googleTimestamp) {
+        jdbcTemplate.update(ADD_TRADING_STATUS, Map.of(
+                "figi", figi,
+                "status", tradingStatus)
+        );
+        addTradingStatusHistory(figi, tradingStatus, googleTimestamp);
+    }
+
+    private void addTradingStatusHistory(String figi, String tradingStatus, Timestamp googleTimestamp) {
         var tradingStatusUpdatedAt = java.sql.Timestamp.from(Instant.ofEpochSecond(googleTimestamp.getSeconds()));
-        jdbcTemplate.update(UPDATE_TRADING_STATUS, Map.of("tradingStatus", tradingStatus, "figi", figi, "tradingStatusUpdatedAt", tradingStatusUpdatedAt));
+        jdbcTemplate.update(ADD_TRADING_STATUS_HISTORY, Map.of(
+                "status", tradingStatus,
+                "figi", figi,
+                "statusUpdatedAt", tradingStatusUpdatedAt)
+        );
     }
 
 
     @Override
     public List<String> figiByTradingStatus(String tradingStatus) {
-        return jdbcTemplate.query(GET_FIGI_BY_TRADING_STATUS, Map.of("tradingStatus", tradingStatus), (rs, rowNum) -> rs.getString(1));
+        return jdbcTemplate.query(GET_FIGI_BY_TRADING_STATUS, Map.of("status", tradingStatus), (rs, rowNum) -> rs.getString(1));
     }
 }

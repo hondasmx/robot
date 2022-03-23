@@ -1,10 +1,13 @@
 auth:
-  token:
+  token: t.m1cjaUO-4owZHxezRQONWbPz39NH-QKyjr4G8GrFvxZDBJKa8KxJwr2decgxqBwp0JymvYCojXhtNFN-PoBkOg
   account: 2091021267
 
 telegram:
-  token:
-  chat-id:
+  token: 5056638065:AAECM3eJIcUFWPuf-egwc7cpTrv6D_0SGJM
+  chat-id: -1001634359844
+
+sandbox:
+  account: d70c4172-7186-40ee-8cbf-150490236569
 
 spring:
   jpa:

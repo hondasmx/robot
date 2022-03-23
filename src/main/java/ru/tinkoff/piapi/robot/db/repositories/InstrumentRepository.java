@@ -13,6 +13,4 @@ public interface InstrumentRepository {
     List<String> figiByInstrumentType(String instrumentType);
 
     List<String> findAll();
-
-    List<String> getExchanges();
 }

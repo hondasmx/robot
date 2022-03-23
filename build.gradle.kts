@@ -17,6 +17,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:2.6.2")
     implementation("javax.validation:validation-api:2.0.1.Final")
 
+    //official public api sdk
+    implementation("ru.tinkoff.piapi:java-sdk-core:1.0-M5")
+
     //rest
     implementation("com.konghq:unirest-java:3.13.6")
 
