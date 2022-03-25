@@ -33,6 +33,13 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
 
     private final static String TIME_DIFF_ORDERBOOK = "select figi, created_at, timestamp, EXTRACT(EPOCH FROM (created_at::timestamp - timestamp::timestamp)) as diff from orderbook where now()::timestamptz - created_at <= interval '10 minutes' and created_at - timestamp >= interval '5 minutes'";
 
+    private final static String LIMITS_ORDERBOOK = "select *\n" +
+            "from orderbook\n" +
+            "where now()::timestamptz - created_at <= interval '60 minutes'\n" +
+            "and bid != 0\n" +
+            "and ask != 0\n" +
+            "and (bid > orderbook.limit_up or bid < orderbook.limit_down or ask > orderbook.limit_up or ask < orderbook.limit_down )";
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
@@ -71,6 +78,8 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
         return jdbcTemplate.query(FAILED_ORDERBOOK, new HashMap<>(), (rs, rowNum) -> new OrderbookResponse(
                 rs.getBigDecimal("bid"),
                 rs.getBigDecimal("ask"),
+                rs.getBigDecimal("limit_up"),
+                rs.getBigDecimal("limit_down"),
                 rs.getString("figi"),
                 rs.getTimestamp("timestamp"),
                 rs.getTimestamp("created_at")
@@ -86,12 +95,27 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
         )));
     }
 
+    @Override
+    public Set<OrderbookResponse> failedLimits() {
+        return new HashSet<>(jdbcTemplate.query(LIMITS_ORDERBOOK, new HashMap<>(), (rs, rowNum) -> new OrderbookResponse(
+                rs.getBigDecimal("bid"),
+                rs.getBigDecimal("ask"),
+                rs.getBigDecimal("limit_up"),
+                rs.getBigDecimal("limit_down"),
+                rs.getString("figi"),
+                rs.getTimestamp("timestamp"),
+                rs.getTimestamp("created_at")
+        )));
+    }
+
     @Data
     @AllArgsConstructor
     @EqualsAndHashCode(of = {"figi"})
     public static class OrderbookResponse {
         BigDecimal bid;
         BigDecimal ask;
+        BigDecimal limitUp;
+        BigDecimal limitDown;
         String figi;
         Timestamp timestamp;
         Timestamp createdAt;

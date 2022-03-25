@@ -60,14 +60,14 @@ public class OrderbookScheduler {
     }
 
     // Проверяем, что last price находится в пределах limitUp / limitDown
-    @Scheduled(fixedRate = 1000 * 60 * 10, initialDelay = 1000 * 60 * 6)
+    @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 60 * 6)
     public void limitUpLimitDownChecker() {
         log.debug("job started: limitUpLimitDownChecker");
-        var timeDiffOrderbook = orderbookRepository.timeDiffOrderbook();
-        if (timeDiffOrderbook.size() > 0) {
-            var builder = new StringBuilder("Стакан пришел с задержкой >= 5 минут \n\n");
-            for (OrderbookRepositoryImpl.TimeDiffResponse response : timeDiffOrderbook) {
-                builder.append(MessageFormat.format("figi: {0}, timestamp: {1}, diff: {2} \n", response.getFigi(), response.getTimestamp(), response.getDiff()));
+        var failedLimits = orderbookRepository.failedLimits();
+        if (failedLimits.size() > 0) {
+            var builder = new StringBuilder("Bid/ask находятся за лимитами \n\n");
+            for (OrderbookRepositoryImpl.OrderbookResponse response : failedLimits) {
+                builder.append(MessageFormat.format("figi: {0}, timestamp: {1}, limitup: {2}, limitdown: {3} \n", response.getFigi(), response.getTimestamp(), response.getLimitUp(), response.getLimitDown()));
             }
             var message = builder.toString();
             log.error(message);

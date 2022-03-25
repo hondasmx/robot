@@ -16,4 +16,5 @@ public interface OrderbookRepository {
 
     Set<OrderbookRepositoryImpl.TimeDiffResponse> timeDiffOrderbook();
 
+    Set<OrderbookRepositoryImpl.OrderbookResponse> failedLimits();
 }
