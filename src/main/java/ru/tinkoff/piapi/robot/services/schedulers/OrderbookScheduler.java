@@ -67,7 +67,12 @@ public class OrderbookScheduler {
         if (failedLimits.size() > 0) {
             var builder = new StringBuilder("Bid/ask находятся за лимитами \n\n");
             for (OrderbookRepositoryImpl.OrderbookResponse response : failedLimits) {
-                builder.append(MessageFormat.format("figi: {0}, timestamp: {1}, limitup: {2}, limitdown: {3} \n", response.getFigi(), response.getTimestamp(), response.getLimitUp(), response.getLimitDown()));
+                var normalTradingFigi = new HashSet<>(streamService.normalTradingFigi);
+                var figi = response.getFigi();
+                if (!normalTradingFigi.contains(figi)) {
+                    continue;
+                }
+                builder.append(MessageFormat.format("figi: {0}, timestamp: {1}, limitup: {2}, limitdown: {3}, bid: {4}, ask: {5} \n", figi, response.getTimestamp(), response.getLimitUp(), response.getLimitDown(), response.getBid(), response.getAsk()));
             }
             var message = builder.toString();
             log.error(message);

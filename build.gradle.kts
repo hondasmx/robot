@@ -20,6 +20,9 @@ dependencies {
     //official public api sdk
     implementation("ru.tinkoff.piapi:java-sdk-core:1.0-M5")
 
+    //utils
+    implementation("com.google.guava:guava:31.1-jre")
+
     //rest
     implementation("com.konghq:unirest-java:3.13.6")
 

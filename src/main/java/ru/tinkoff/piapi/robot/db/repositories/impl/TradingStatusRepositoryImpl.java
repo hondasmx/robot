@@ -20,6 +20,8 @@ public class TradingStatusRepositoryImpl implements TradingStatusRepository {
 
     private final String GET_FIGI_BY_TRADING_STATUS = "Select figi from trading_status where status = :status";
 
+    private final String GET_FIGI_BY_OTC_FLAG = "Select figi from instruments where otc_flag = :otcFlag";
+
     private final String ADD_TRADING_STATUS_HISTORY = "INSERT INTO trading_status_history (updated_at, status, status_updated_at, figi) VALUES  (now(), :status, :statusUpdatedAt, :figi)";
 
     private final String ADD_TRADING_STATUS = "INSERT INTO trading_status (figi, status) VALUES  (:figi, :status) " +
@@ -47,5 +49,10 @@ public class TradingStatusRepositoryImpl implements TradingStatusRepository {
     @Override
     public List<String> figiByTradingStatus(String tradingStatus) {
         return jdbcTemplate.query(GET_FIGI_BY_TRADING_STATUS, Map.of("status", tradingStatus), (rs, rowNum) -> rs.getString(1));
+    }
+
+    @Override
+    public List<String> figiByOtcStatus(boolean otcFlag) {
+        return jdbcTemplate.query(GET_FIGI_BY_OTC_FLAG, Map.of("otcFlag", otcFlag), (rs, rowNum) -> rs.getString(1));
     }
 }

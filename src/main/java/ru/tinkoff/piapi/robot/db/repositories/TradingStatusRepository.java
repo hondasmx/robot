@@ -8,4 +8,6 @@ public interface TradingStatusRepository {
     void addTradingStatus(String figi, String tradingStatus, Timestamp tradingStatusUpdatedAt);
 
     List<String> figiByTradingStatus(String tradingStatus);
+
+    List<String> figiByOtcStatus(boolean otcFlag);
 }

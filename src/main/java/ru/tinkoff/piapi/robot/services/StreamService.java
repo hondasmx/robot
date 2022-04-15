@@ -36,6 +36,7 @@ public class StreamService {
     private final GrpcStreamOrdersService ordersGrpcService;
     private final long DEFAULT_DELAY = 5000;
     public Set<String> normalTradingFigi = Collections.synchronizedSet(new HashSet<>());
+    public Set<String> nonOtcFigi = Collections.synchronizedSet(new HashSet<>());
     private ScheduledExecutorService infoStreamExecutorService = Executors.newScheduledThreadPool(2);
     private ScheduledExecutorService tradesExecutorService = Executors.newScheduledThreadPool(2);
     private ScheduledExecutorService orderbookExecutorService = Executors.newScheduledThreadPool(2);
@@ -47,6 +48,7 @@ public class StreamService {
 
     public void collectFigi() {
         normalTradingFigi = new HashSet<>(tradingStatusRepository.figiByTradingStatus(SecurityTradingStatus.SECURITY_TRADING_STATUS_NORMAL_TRADING.name()));
+        nonOtcFigi = new HashSet<>(tradingStatusRepository.figiByOtcStatus(false));
         allFigi = new HashSet<>(instrumentRepository.findAll());
         log.info("normal_trading figi size {}", normalTradingFigi.size());
         log.info("all figi size {}", allFigi.size());

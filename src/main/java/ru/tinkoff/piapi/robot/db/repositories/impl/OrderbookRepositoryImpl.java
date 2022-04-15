@@ -36,6 +36,8 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
     private final static String LIMITS_ORDERBOOK = "select *\n" +
             "from orderbook\n" +
             "where now()::timestamptz - created_at <= interval '60 minutes'\n" +
+            "and limit_down != 0\n" +
+            "and limit_up != 0\n" +
             "and bid != 0\n" +
             "and ask != 0\n" +
             "and (bid > orderbook.limit_up or bid < orderbook.limit_down or ask > orderbook.limit_up or ask < orderbook.limit_down )";
