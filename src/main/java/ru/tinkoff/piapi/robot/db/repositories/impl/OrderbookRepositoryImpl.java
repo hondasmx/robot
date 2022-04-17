@@ -33,6 +33,8 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
 
     private final static String TIME_DIFF_ORDERBOOK = "select figi, created_at, timestamp, EXTRACT(EPOCH FROM (created_at::timestamp - timestamp::timestamp)) as diff from orderbook where now()::timestamptz - created_at <= interval '10 minutes' and created_at - timestamp >= interval '5 minutes'";
 
+    private final static String ZERO_LIMITS = "select figi from orderbook where now()::timestamptz - created_at <= interval '30 minutes' and limit_up = 0 or limit_down = 0";
+
     private final static String LIMITS_ORDERBOOK = "select *\n" +
             "from orderbook\n" +
             "where now()::timestamptz - created_at <= interval '60 minutes'\n" +
@@ -98,7 +100,7 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
     }
 
     @Override
-    public Set<OrderbookResponse> failedLimits() {
+    public Set<OrderbookResponse> bidsOutOfLits() {
         return new HashSet<>(jdbcTemplate.query(LIMITS_ORDERBOOK, new HashMap<>(), (rs, rowNum) -> new OrderbookResponse(
                 rs.getBigDecimal("bid"),
                 rs.getBigDecimal("ask"),
@@ -108,6 +110,11 @@ public class OrderbookRepositoryImpl implements OrderbookRepository {
                 rs.getTimestamp("timestamp"),
                 rs.getTimestamp("created_at")
         )));
+    }
+
+    @Override
+    public Set<String> zeroLimits() {
+        return new HashSet<>(jdbcTemplate.query(ZERO_LIMITS, Map.of(), (rs, rowNum) -> rs.getString(1)));
     }
 
     @Data

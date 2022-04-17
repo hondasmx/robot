@@ -10,6 +10,7 @@ import ru.tinkoff.piapi.robot.services.StreamService;
 import ru.tinkoff.piapi.robot.services.TelegramService;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashSet;
 
 @Slf4j
@@ -61,9 +62,9 @@ public class OrderbookScheduler {
 
     // Проверяем, что last price находится в пределах limitUp / limitDown
     @Scheduled(fixedRate = 1000 * 60 * 60, initialDelay = 1000 * 60 * 6)
-    public void limitUpLimitDownChecker() {
+    public void lastPriceInsideLimitUpLimitDownChecker() {
         log.debug("job started: limitUpLimitDownChecker");
-        var failedLimits = orderbookRepository.failedLimits();
+        var failedLimits = orderbookRepository.bidsOutOfLits();
         if (failedLimits.size() > 0) {
             var builder = new StringBuilder("Bid/ask находятся за лимитами \n\n");
             for (OrderbookRepositoryImpl.OrderbookResponse response : failedLimits) {
@@ -79,5 +80,18 @@ public class OrderbookScheduler {
             telegramService.sendMessage(message);
         }
         log.debug("job finished: limitUpLimitDownChecker");
+    }
+
+    // Проверяем, что limitUp / limitDown не 0
+    @Scheduled(fixedRate = 1000 * 60 * 30, initialDelay = 1000 * 60 * 3)
+    public void zeroLimitsChecker() {
+        log.debug("job started: zeroLimitsChecker");
+        var failedLimits = orderbookRepository.zeroLimits();
+        if (failedLimits.size() > 0) {
+            var message = "Limitup/limitdown = 0 \n\n" + Arrays.toString(failedLimits.toArray());
+            log.error(message);
+            telegramService.sendMessage(message);
+        }
+        log.debug("job finished: zeroLimitsChecker");
     }
 }

@@ -16,5 +16,7 @@ public interface OrderbookRepository {
 
     Set<OrderbookRepositoryImpl.TimeDiffResponse> timeDiffOrderbook();
 
-    Set<OrderbookRepositoryImpl.OrderbookResponse> failedLimits();
+    Set<OrderbookRepositoryImpl.OrderbookResponse> bidsOutOfLits();
+
+    Set<String> zeroLimits();
 }
