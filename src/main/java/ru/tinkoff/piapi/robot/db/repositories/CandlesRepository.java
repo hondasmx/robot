@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 public interface CandlesRepository {
 
-    void addCandle(String figi, Timestamp timestamp, BigDecimal high, BigDecimal low, long volume);
+    void addCandle(String figi, Timestamp timestamp, BigDecimal high, BigDecimal low, long volume, BigDecimal close, BigDecimal open);
 
     java.sql.Timestamp lastCandle();
 

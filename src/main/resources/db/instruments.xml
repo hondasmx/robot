@@ -13,8 +13,7 @@
                 ticker            text                                     NOT NULL,
                 class_code        text                                     NOT NULL,
                 instrument_type   text,
-                api_trade_flag    Boolean,
-                instrument_status text,
+                api_trade_available_flag    Boolean,
                 lot               integer,
                 currency          text,
                 otc_flag          Boolean,
@@ -24,6 +23,12 @@
 
             ALTER TABLE instruments
                 OWNER TO postgres;
+
+        </sql>
+    </changeSet>
+    <changeSet id="2022-04-27" author="hondasmx">
+        <sql>
+            ALTER TABLE instruments ADD COLUMN IF NOT EXISTS real_exchange text;
 
         </sql>
     </changeSet>

@@ -20,8 +20,8 @@ public class InstrumentRepositoryImpl implements InstrumentRepository {
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     // insert or replace
-    private final String INSERT_SQL = "insert into instruments (figi, isin, class_code, ticker, instrument_type, api_trade_flag, otc_flag, instrument_status, exchange, lot, currency) values (:figi, :isin, :classCode, :ticker, :instrumentType, :apiTradeFlag, :otcFlag, :instrumentStatus, :exchange, :lot, :currency)" +
-            "ON CONFLICT (figi) DO UPDATE SET ( isin, class_code, ticker, instrument_type, api_trade_flag, otc_flag, instrument_status, exchange, lot, currency) = (excluded.isin, excluded.class_code, excluded.ticker, excluded.instrument_type, excluded.api_trade_flag, excluded.otc_flag, excluded.instrument_status, excluded.exchange, excluded.lot, excluded.currency)";
+    private final String INSERT_SQL = "insert into instruments (figi, isin, class_code, ticker, instrument_type, api_trade_available_flag, otc_flag, exchange, lot, currency, real_exchange) values (:figi, :isin, :classCode, :ticker, :instrumentType, :apiTradeAvailableFlag, :otcFlag, :exchange, :lot, :currency, :realExchange)" +
+            "ON CONFLICT (figi) DO UPDATE SET ( isin, class_code, ticker, instrument_type, api_trade_available_flag, otc_flag, exchange, lot, currency, real_exchange) = (excluded.isin, excluded.class_code, excluded.ticker, excluded.instrument_type, excluded.api_trade_available_flag, excluded.otc_flag, excluded.exchange, excluded.lot, excluded.currency, excluded.real_exchange)";
 
 
     private final String GET_FIGI_BY_INSTRUMENT_TYPE = "select figi from instruments where instrument_type = :instrumentType";

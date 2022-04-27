@@ -1,8 +1,6 @@
-import com.google.protobuf.gradle.*
 
 plugins {
     java
-    id("com.google.protobuf") version "0.8.17"
     id("io.freefair.lombok") version "5.3.0"
 }
 
@@ -13,12 +11,17 @@ repositories {
     }
 }
 
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web:2.6.2")
     implementation("javax.validation:validation-api:2.0.1.Final")
 
     //official public api sdk
-    implementation("ru.tinkoff.piapi:java-sdk-core:1.0-M5")
+    implementation("ru.tinkoff.piapi:java-sdk-core:1.0-M7")
+
+    //mapper
+    implementation("org.mapstruct:mapstruct:1.4.2.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.4.2.Final")
 
     //utils
     implementation("com.google.guava:guava:31.1-jre")
@@ -40,7 +43,11 @@ dependencies {
 
     implementation("com.google.guava:guava:30.1.1-jre")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus:1.8.1")
-    compileOnly("org.projectlombok:lombok:1.18.22")
+
+    //lombok
+    compileOnly ("org.projectlombok:lombok:1.18.22")
+    annotationProcessor("org.projectlombok:lombok:1.18.22")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
 }
 
 group = "ru.tinkoff.public.invest.api.robot"
@@ -49,34 +56,6 @@ description = "piapi-robot"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 
-sourceSets {
-    main {
-        java {
-            srcDirs("build/generated/source/proto/main/grpc")
-            srcDirs("build/generated/source/proto/main/java")
-        }
-    }
-}
-
-
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.18.1"
-    }
-    plugins {
-        id("grpc") {
-            artifact = "io.grpc:protoc-gen-grpc-java:1.24.0"
-        }
-    }
-    generateProtoTasks {
-        ofSourceSet("main").forEach {
-            it.plugins {
-                id("grpc")
-            }
-        }
-    }
-}
-
-tasks.withType<JavaCompile>() {
+tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }

@@ -22,4 +22,10 @@
 
         </sql>
     </changeSet>
+    <changeSet id="2022-04-21_candles" author="hondasmx">
+        <sql>
+            ALTER TABLE candles ADD COLUMN IF NOT EXISTS close real, ADD COLUMN IF NOT EXISTS open real;
+
+        </sql>
+    </changeSet>
 </databaseChangeLog>

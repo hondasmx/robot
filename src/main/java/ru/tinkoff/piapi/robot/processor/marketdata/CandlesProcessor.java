@@ -10,6 +10,7 @@ import ru.tinkoff.piapi.robot.processor.StreamProcessor;
 import ru.tinkoff.piapi.robot.utils.MoneyUtils;
 
 import static ru.tinkoff.piapi.robot.processor.StreamNames.CANDLES;
+import static ru.tinkoff.piapi.robot.utils.MoneyUtils.*;
 
 @Component
 @Slf4j
@@ -24,10 +25,12 @@ public class CandlesProcessor implements StreamProcessor<MarketDataResponse> {
             var candle = response.getCandle();
             var figi = candle.getFigi();
             var time = candle.getTime();
-            var high = MoneyUtils.quotationToBigDecimal(candle.getHigh());
-            var low = MoneyUtils.quotationToBigDecimal(candle.getLow());
+            var high = quotationToBigDecimal(candle.getHigh());
+            var low = quotationToBigDecimal(candle.getLow());
             var volume = candle.getVolume();
-            candlesRepository.addCandle(figi, time, high, low, volume);
+            var close = quotationToBigDecimal(candle.getClose());
+            var open = quotationToBigDecimal(candle.getOpen());
+            candlesRepository.addCandle(figi, time, high, low, volume, close, open);
         }  else if (response.hasSubscribeCandlesResponse()) {
             var count = response.getSubscribeCandlesResponse().getCandlesSubscriptionsList().stream().filter(el -> el.getSubscriptionStatus().equals(SubscriptionStatus.SUBSCRIPTION_STATUS_SUCCESS)).count();
             log.info("success candles subscriptions: {}", count);
